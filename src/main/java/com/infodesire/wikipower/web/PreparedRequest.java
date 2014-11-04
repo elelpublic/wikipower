@@ -4,15 +4,13 @@
 package com.infodesire.wikipower.web;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterators;
+import com.infodesire.wikipower.wiki.Route;
 
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -30,17 +28,13 @@ public class PreparedRequest {
 
   private URIBuilder uriBuilder;
   private HttpServletRequest request;
-  private List<String> route = new ArrayList<String>();
+  private Route route;
 
 
   public PreparedRequest( HttpServletRequest request ) throws URISyntaxException {
     uriBuilder = parse( request );
     this.request = request;
-    for( String routeElement : Splitter.on( "/" ).split( uriBuilder.getPath() ) ) {
-      if( !Strings.isNullOrEmpty( routeElement ) ) {
-        route.add( routeElement );
-      }
-    }
+    route = Route.parse( uriBuilder.getPath() );
   }
   
   
@@ -54,7 +48,7 @@ public class PreparedRequest {
   }
   
   
-  public List<String> getRoute() {
+  public Route getRoute() {
     return route;
   }
 
@@ -82,12 +76,7 @@ public class PreparedRequest {
     line( "Fragment", uriBuilder.getFragment(), writer );
     line( "UserInfo", uriBuilder.getUserInfo(), writer );
 
-    line( "Route", writer );
-    int index = 0;
-    for( String routeElement : route ) {
-      line( "Route #" + index, routeElement, writer );
-      index++;
-    }
+    line( "Route", route, writer );
     
     line( "Request", writer );
     line( "AuthType", request.getAuthType(), writer );
@@ -171,6 +160,11 @@ public class PreparedRequest {
     
     return new URIBuilder( fullURL );
 
+  }
+  
+  
+  public String toString() {
+    return request.getMethod() + " " + route;
   }
 
 
