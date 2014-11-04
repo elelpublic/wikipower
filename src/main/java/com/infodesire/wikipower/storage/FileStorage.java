@@ -3,14 +3,21 @@
 
 package com.infodesire.wikipower.storage;
 
+import com.google.common.io.ByteStreams;
 import com.infodesire.wikipower.wiki.Page;
 import com.infodesire.wikipower.wiki.Route;
 import com.infodesire.wikipower.wiki.RouteInfo;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
+import org.apache.log4j.Logger;
 import org.eclipse.mylyn.wikitext.mediawiki.core.MediaWikiLanguage;
 
 
@@ -19,6 +26,9 @@ import org.eclipse.mylyn.wikitext.mediawiki.core.MediaWikiLanguage;
  *
  */
 public class FileStorage implements Storage {
+  
+  
+  private static Logger logger = Logger.getLogger( FileStorage.class );
 
 
   private File baseDir;
@@ -26,6 +36,45 @@ public class FileStorage implements Storage {
 
   public FileStorage( File baseDir ) {
     this.baseDir = baseDir;
+    
+    if( !baseDir.exists() ) {
+      init();
+    }
+    
+  }
+
+
+  private void init() {
+    
+    baseDir.mkdirs();
+    
+    try {
+      
+      InputStream in = FileStorage.class.getResourceAsStream( "/sample-wiki.zip" );
+      if( in == null ) {
+        logger.fatal( "Cannot create sample wiki. Reason: missing sample-wiki.zip in the running jar file." );
+      }
+      else {
+        ZipInputStream zin = new ZipInputStream( in );
+        ZipEntry entry;
+        while( (entry = zin.getNextEntry()) != null ) {
+          if( !entry.isDirectory() ) {
+            File outFile = new File( baseDir.getParent(), entry.getName() );
+            System.out.println("outFile=" + outFile);
+            System.out.println("outFile.parent=" + outFile.getParentFile());
+            outFile.getParentFile().mkdirs();
+            OutputStream to = new FileOutputStream( outFile );
+            ByteStreams.copy( zin, to );
+            to.close();
+          }
+        }
+        zin.close();
+      }
+    }
+    catch( Exception ex ) {
+      logger.fatal( "Error unpacking sample wiki", ex );
+    }
+    
   }
 
 
