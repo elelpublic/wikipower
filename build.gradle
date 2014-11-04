@@ -64,6 +64,7 @@ dependencies {
     	'org.eclipse.mylyn.wikitext:org.eclipse.mylyn.wikitext.core:2.3.0.N20140929-1849',
     	'org.eclipse.mylyn.wikitext:org.eclipse.mylyn.wikitext.html.core:2.3.0.N20140929-1849',
     	'org.eclipse.mylyn.wikitext:org.eclipse.mylyn.wikitext.mediawiki.core:2.3.0.N20140929-1849',
+//    	'com.github.sebhoss.doxia:doxia-wikitext-common:2.0.0',
     	'servletapi:servlet-api:2.4',
     	'org.eclipse.jetty:jetty-server:9.2.3.v20140905',
     	'org.eclipse.jetty:jetty-servlet:9.2.3.v20140905',

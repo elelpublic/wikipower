@@ -100,14 +100,14 @@ public class Servlet extends HttpServlet {
     writer.println( "<h2>Pages</h2>" );
     writer.println( "<div>" );
     for( Route subRoute : storage.listPages( route ) ) {
-      writer.println( "<a href=\"" + subRoute + "\">" + subRoute.getLast() + "</a>" );
+      writer.println( "<a href=\"" + subRoute + "\">" + subRoute.getLast() + "</a><br>" );
     }
     writer.println( "</div>" );
     
     writer.println( "<h2>Folders</h2>" );
     writer.println( "<div>" );
     for( Route subRoute : storage.listFolders( route ) ) {
-      writer.println( "<a href=\"" + subRoute + "\">" + subRoute.getLast() + "/</a>" );
+      writer.println( "<a href=\"" + subRoute + "\">" + subRoute.getLast() + "/</a><br>" );
     }
     writer.println( "</div>" );
     
