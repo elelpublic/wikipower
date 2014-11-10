@@ -11,6 +11,8 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'application'
+apply plugin: 'war'
+apply plugin: 'jetty'
 
 group = 'com.infodesire'
 version = '0.1-SNAPSHOT'

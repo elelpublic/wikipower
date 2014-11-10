@@ -1,3 +1,16 @@
+# node dependencies
+node_modules
+
+# bower dependencies
+bower_components
+
+# Users Environment Variables
+.lock-wscript
+
+# Mac
+.DS_Store
+
+# Gradle
 .gradle
 build/
 

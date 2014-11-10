@@ -4,7 +4,6 @@
 package com.infodesire.wikipower.web;
 
 import com.google.common.base.Throwables;
-import com.google.common.io.ByteStreams;
 import com.infodesire.wikipower.storage.FileStorage;
 import com.infodesire.wikipower.storage.Storage;
 import com.infodesire.wikipower.wiki.Page;
@@ -13,12 +12,10 @@ import com.infodesire.wikipower.wiki.RouteInfo;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -48,10 +45,7 @@ public class Servlet extends HttpServlet {
       
       Route route = request.getRoute();
       
-      if( route.toString().toLowerCase().equals( "favicon.ico" ) ) {
-        favicon( response );
-      }
-      else if( route.toString().equals( "debug" ) ) {
+      if( route.toString().equals( "debug" ) ) {
         debug( request, response );
       }
       else if( route.size() > 0 && route.getFirst().equals( "wiki" ) ) {
@@ -141,22 +135,6 @@ public class Servlet extends HttpServlet {
   }
 
 
-  private void favicon(HttpServletResponse response ) throws IOException {
-
-    response.setContentType( "image/x-icon" );
-    response.setStatus( HttpServletResponse.SC_OK );
-
-    InputStream in = Servlet.class.getResourceAsStream( "/favicon.ico" );
-    ServletOutputStream to = response.getOutputStream();
-    
-    ByteStreams.copy( in, to );
-    
-    in.close();
-    to.close();
-    
-  }
-
-
   private void showPage( HttpServletResponse response, Page page )
     throws IOException {
 
@@ -196,6 +174,9 @@ public class Servlet extends HttpServlet {
     response.setStatus( HttpServletResponse.SC_OK );
 
     PrintWriter writer = response.getWriter();
+    writer.println( "<html><head>" );
+    writer.println( "<link rel=\"icon\" type=\"image/ico\" href=\"favicon.ico\"/>" );
+    writer.println( "</head><body>" );
     writer.println( "<h1>Welcome to Wikipower</h1>" );
     writer.println( "<div>" );
     
@@ -209,6 +190,7 @@ public class Servlet extends HttpServlet {
     writer.println( "</ul>" );
     
     writer.println( "</div>" );
+    writer.println( "</body></html>" );
     writer.close();
 
   }
