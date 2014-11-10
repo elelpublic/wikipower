@@ -45,6 +45,9 @@ public class Servlet extends HttpServlet {
       
       Route route = request.getRoute();
       
+      // remove the leading 'wikipower'
+      route = route.removeFirst();
+      
       if( route.toString().equals( "debug" ) ) {
         debug( request, response );
       }
@@ -63,7 +66,7 @@ public class Servlet extends HttpServlet {
         }
       }
       else {
-        welcomePage( response );
+        response.sendRedirect( "static" );
       }
 
     }
@@ -87,6 +90,7 @@ public class Servlet extends HttpServlet {
 
     PrintWriter writer = response.getWriter();
     
+    head( writer );
     navigation( writer );
     
     writer.println( "<h1>Listing of " + route + "</h1>" );
@@ -104,14 +108,15 @@ public class Servlet extends HttpServlet {
       writer.println( "<a href=\"" + subRoute + "\">" + subRoute.getLast() + "/</a><br>" );
     }
     writer.println( "</div>" );
-    
+
+    foot( writer );
     writer.close();
     
   }
 
 
   private void navigation( PrintWriter writer ) throws IOException {
-    writer.println( "<a href=\"/\">Home</a><hr>" );
+    writer.println( "<a href=\"/wikipower\">Home</a><hr>" );
   }
 
 
@@ -122,6 +127,7 @@ public class Servlet extends HttpServlet {
 
     PrintWriter writer = response.getWriter();
     
+    head( writer );
     navigation( writer );
     
     writer.println( "<h1>Debug the HTTP request</h1>" );
@@ -130,6 +136,7 @@ public class Servlet extends HttpServlet {
     request.toHTML( writer );
     
     writer.println( "</div>" );
+    foot( writer );
     writer.close();
     
   }
@@ -142,13 +149,27 @@ public class Servlet extends HttpServlet {
     response.setStatus( HttpServletResponse.SC_OK );
 
     PrintWriter writer = response.getWriter();
+    head( writer );
     navigation( writer );
     page.toHtml( writer );
+    foot( writer );
     writer.close();
 
   }
 
 
+  private void head( PrintWriter writer ) {
+    writer.println( "<html><head>" );
+    writer.println( "<link rel=\"icon\" type=\"image/ico\" href=\"/wikipower/favicon.ico\"/>" );
+    writer.println( "</head><body>" );
+  }
+
+
+  private void foot( PrintWriter writer ) {
+    writer.println( "</body></html>" );
+  }
+  
+  
   private void notFoundPage( HttpServletResponse response, Route route )
     throws IOException {
 
@@ -168,32 +189,32 @@ public class Servlet extends HttpServlet {
   }
 
 
-  private void welcomePage( HttpServletResponse response ) throws IOException {
-
-    response.setContentType( "text/html;charset=utf-8" );
-    response.setStatus( HttpServletResponse.SC_OK );
-
-    PrintWriter writer = response.getWriter();
-    writer.println( "<html><head>" );
-    writer.println( "<link rel=\"icon\" type=\"image/ico\" href=\"favicon.ico\"/>" );
-    writer.println( "</head><body>" );
-    writer.println( "<h1>Welcome to Wikipower</h1>" );
-    writer.println( "<div>" );
-    
-//    for( Route route : storage.listPages( new Route() ) ) {
-//      writer.println( "<a href=\"wiki/" + route + "\">" + route.getLast() + "</a>" );
-//    }
-    
-    writer.println( "<ul>" );
-    writer.println( "<li><a href=\"wiki/\">wiki</a></li>" );
-    writer.println( "<li><a href=\"debug/\">debug</a></li>" );
-    writer.println( "</ul>" );
-    
-    writer.println( "</div>" );
-    writer.println( "</body></html>" );
-    writer.close();
-
-  }
+//  private void welcomePage( HttpServletResponse response ) throws IOException {
+//
+//    response.setContentType( "text/html;charset=utf-8" );
+//    response.setStatus( HttpServletResponse.SC_OK );
+//
+//    PrintWriter writer = response.getWriter();
+//    writer.println( "<html><head>" );
+//    writer.println( "<link rel=\"icon\" type=\"image/ico\" href=\"favicon.ico\"/>" );
+//    writer.println( "</head><body>" );
+//    writer.println( "<h1>Welcome to Wikipower</h1>" );
+//    writer.println( "<div>" );
+//    
+////    for( Route route : storage.listPages( new Route() ) ) {
+////      writer.println( "<a href=\"wiki/" + route + "\">" + route.getLast() + "</a>" );
+////    }
+//    
+//    writer.println( "<ul>" );
+//    writer.println( "<li><a href=\"wiki/\">wiki</a></li>" );
+//    writer.println( "<li><a href=\"debug/\">debug</a></li>" );
+//    writer.println( "</ul>" );
+//    
+//    writer.println( "</div>" );
+//    writer.println( "</body></html>" );
+//    writer.close();
+//
+//  }
 
 
   private void errorPage( Exception ex, HttpServletRequest request,
