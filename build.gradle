@@ -17,6 +17,8 @@ apply plugin: 'jetty'
 group = 'com.infodesire'
 version = '0.1-SNAPSHOT'
 httpPort = 8080
+stopPort = 8081
+stopKey = 10
 
 mainClassName = "com.infodesire.wikipower.web.WebServer"
 
@@ -77,6 +79,10 @@ war {
 		include 'bower_components/**'
 		exclude 'bower_components/jquery/src/**'
 	}
+}
+
+jettyRunWar {
+//    daemon = true 
 }
 
 
