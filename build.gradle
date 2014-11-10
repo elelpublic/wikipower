@@ -16,6 +16,7 @@ apply plugin: 'jetty'
 
 group = 'com.infodesire'
 version = '0.1-SNAPSHOT'
+httpPort = 8080
 
 mainClassName = "com.infodesire.wikipower.web.WebServer"
 
@@ -56,6 +57,29 @@ repositories {
 	    }
 	}	
 }
+
+
+/* 
+* Call bower to install javascript dependencies
+*/
+task bowerInstall(type: Exec) {
+    workingDir '.'
+    executable = 'bower'
+    args = ['install']
+}
+
+war.dependsOn bowerInstall
+jettyRun.dependsOn bowerInstall
+
+war {
+//	archiveName = warArchiveName
+	from( '.' ) {
+		include 'bower_components/**'
+		exclude 'bower_components/jquery/src/**'
+	}
+}
+
+
 
 // In this section you declare the dependencies for your production and test code
 dependencies {

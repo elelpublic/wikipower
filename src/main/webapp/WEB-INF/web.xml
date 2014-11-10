@@ -23,6 +23,11 @@
 
     <servlet-mapping>
         <servlet-name>default</servlet-name>
+        <url-pattern>/bower_components/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
         <url-pattern>/favicon.ico</url-pattern>
     </servlet-mapping>
 
