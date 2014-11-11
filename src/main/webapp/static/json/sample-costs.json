@@ -1,0 +1,103 @@
+{
+  "StatusCode": {
+    "CodeNumber": 0,
+    "Name": "OK",
+    "IsError": false,
+    "IsWarning": false,
+    "Message": "Operation successful"
+  },
+  "TotalEntryCount": 7,
+  "EntryCount": 7,
+  "Entries": [
+    {
+      "belongsFInvLine": false,
+      "belongsToDrive": true,
+      "belongsToFInvLine": true,
+      "belongsToReceipt": true,
+      "belongsToTravel": true,
+      "bsmExtraFields": {},
+      "description": "Fahrtkosten projektbezogen",
+      "id": "Fahrtkosten",
+      "parentCost": "Projektkosten",
+      "subcosts": []
+    },
+    {
+      "belongsFInvLine": false,
+      "belongsToDrive": true,
+      "belongsToFInvLine": true,
+      "belongsToReceipt": true,
+      "belongsToTravel": true,
+      "bsmExtraFields": {},
+      "description": "Fremdleistungen/Leistungszukauf",
+      "id": "Fremdleistungen",
+      "parentCost": "Projektkosten",
+      "subcosts": []
+    },
+    {
+      "belongsFInvLine": false,
+      "belongsToDrive": false,
+      "belongsToFInvLine": true,
+      "belongsToReceipt": false,
+      "belongsToTravel": false,
+      "bsmExtraFields": {},
+      "description": "Gemeinkosten",
+      "id": "Gemeinkosten",
+      "subcosts": []
+    },
+    {
+      "belongsFInvLine": false,
+      "belongsToDrive": true,
+      "belongsToFInvLine": true,
+      "belongsToReceipt": true,
+      "belongsToTravel": true,
+      "bsmExtraFields": {},
+      "description": "Lizenzgebühren",
+      "id": "Lizenzgebühren",
+      "parentCost": "Projektkosten",
+      "subcosts": [],
+      "valueAddedTax": "Full|19.10.2006|Germany"
+    },
+    {
+      "belongsFInvLine": false,
+      "belongsToDrive": true,
+      "belongsToFInvLine": true,
+      "belongsToReceipt": true,
+      "belongsToTravel": true,
+      "bsmExtraFields": {},
+      "description": "Projektkosten",
+      "id": "Projektkosten",
+      "subcosts": [
+        "Reisekosten",
+        "Fahrtkosten",
+        "Sachkosten",
+        "Fremdleistungen",
+        "Lizenzgebühren"
+      ]
+    },
+    {
+      "belongsFInvLine": false,
+      "belongsToDrive": true,
+      "belongsToFInvLine": true,
+      "belongsToReceipt": true,
+      "belongsToTravel": false,
+      "bsmExtraFields": {},
+      "description": "Reisekosten Projektbezogen",
+      "id": "Reisekosten",
+      "parentCost": "Projektkosten",
+      "subcosts": [],
+      "valueAddedTax": "Full|01.01.2000|Germany"
+    },
+    {
+      "belongsFInvLine": false,
+      "belongsToDrive": true,
+      "belongsToFInvLine": true,
+      "belongsToReceipt": true,
+      "belongsToTravel": true,
+      "bsmExtraFields": {},
+      "description": "Sachkosten projektbezogen",
+      "id": "Sachkosten",
+      "parentCost": "Projektkosten",
+      "subcosts": []
+    }
+  ]
+}

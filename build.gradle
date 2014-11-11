@@ -16,8 +16,8 @@ apply plugin: 'jetty'
 
 group = 'com.infodesire'
 version = '0.1-SNAPSHOT'
-httpPort = 8080
-stopPort = 8081
+httpPort = 8081
+stopPort = 8082
 stopKey = 10
 
 mainClassName = "com.infodesire.wikipower.web.WebServer"
