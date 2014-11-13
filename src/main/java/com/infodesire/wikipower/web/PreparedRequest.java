@@ -10,7 +10,9 @@ import com.infodesire.wikipower.wiki.Route;
 
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.Map;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -104,11 +106,18 @@ public class PreparedRequest {
     line( "ServletPath", request.getServletPath(), writer );
     line( "UserPrincipal", request.getUserPrincipal(), writer );
     
-    line( "Parameters", writer );
+    line( "QueryParameters", writer );
     for( NameValuePair param : uriBuilder.getQueryParams() ) {
       line( param.getName(), param.getValue(), writer );
     }
 
+    line( "Parameters", writer );
+    for( Object object : request.getParameterMap().entrySet() ) {
+      @SuppressWarnings("rawtypes")
+      Map.Entry entry = (Map.Entry) object;
+      line( "" + entry.getKey(), entry.getValue(), writer );
+    }
+    
     line( "Headers", writer );
     for( @SuppressWarnings("rawtypes")
     Enumeration e = request.getHeaderNames(); e.hasMoreElements(); ) {
@@ -142,6 +151,9 @@ public class PreparedRequest {
 
 
   private static void line( String name, Object value, PrintWriter writer ) {
+    if( value != null && value.getClass().isArray() ) {
+      value = Arrays.asList( (Object[]) value );
+    }
     writer.println( "<tr><td><i>" + name + "</i></td><td>" + ( value == null ? "" : value ) + "</td></tr>" );
   }
 
@@ -165,6 +177,21 @@ public class PreparedRequest {
   
   public String toString() {
     return request.getMethod() + " " + route;
+  }
+
+
+  /**
+   * @param name Name of parameter. Query parameters are found in the URL behind the ?
+   * @return Query parameter by name
+   * 
+   */
+  public String getQueryParam( String name ) {
+    for( NameValuePair param : uriBuilder.getQueryParams() ) {
+      if( param.getName().equals( name ) ) {
+        return param.getValue();
+      }
+    }
+    return null;
   }
 
 
