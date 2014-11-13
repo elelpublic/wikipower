@@ -143,7 +143,7 @@ public class Servlet extends HttpServlet {
 
 
   private void showPage( HttpServletResponse response, Page page )
-    throws IOException {
+    throws IOException, InstantiationException, IllegalAccessException {
 
     response.setContentType( "text/html;charset=utf-8" );
     response.setStatus( HttpServletResponse.SC_OK );

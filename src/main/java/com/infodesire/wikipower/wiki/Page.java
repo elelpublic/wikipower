@@ -4,14 +4,15 @@
 package com.infodesire.wikipower.wiki;
 
 import com.infodesire.wikipower.storage.MarkupSource;
+import com.infodesire.wikipower.web.Language;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.StringWriter;
 
 import org.eclipse.mylyn.wikitext.core.parser.MarkupParser;
 import org.eclipse.mylyn.wikitext.core.parser.builder.HtmlDocumentBuilder;
-import org.eclipse.mylyn.wikitext.core.parser.markup.MarkupLanguage;
 
 
 /**
@@ -24,32 +25,35 @@ public class Page {
   private MarkupSource source;
 
 
-  private MarkupLanguage language;
+  private Language language;
 
 
   private String html;
 
 
-  public Page( MarkupSource source, MarkupLanguage language ) {
+  public Page( MarkupSource source, Language language ) {
     this.source = source;
     this.language = language;
   }
 
 
-  public void toHtml( PrintWriter writer ) throws IOException {
+  public void toHtml( PrintWriter writer ) throws IOException, InstantiationException, IllegalAccessException {
     
     if( html == null ) {
     
       MarkupParser markupParser = new MarkupParser();
-      markupParser.setMarkupLanguage( language );
+      markupParser.setMarkupLanguage( language.createParser() );
       Reader markupReader = source.getSource();
       
-      HtmlDocumentBuilder builder = new HtmlDocumentBuilder( writer );
+      StringWriter stringWriter = new StringWriter();
+      HtmlDocumentBuilder builder = new HtmlDocumentBuilder( stringWriter );
       // avoid the <html> and <body> tags: 
       //builder.setEmitAsDocument(false);
 
       markupParser.setBuilder( builder );
       markupParser.parse( markupReader );
+      
+      html = stringWriter.toString();
       
     }
     

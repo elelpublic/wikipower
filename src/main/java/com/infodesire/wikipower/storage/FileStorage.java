@@ -4,6 +4,8 @@
 package com.infodesire.wikipower.storage;
 
 import com.google.common.io.ByteStreams;
+import com.google.common.io.Files;
+import com.infodesire.wikipower.web.Language;
 import com.infodesire.wikipower.wiki.Page;
 import com.infodesire.wikipower.wiki.Route;
 import com.infodesire.wikipower.wiki.RouteInfo;
@@ -18,7 +20,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.log4j.Logger;
-import org.eclipse.mylyn.wikitext.mediawiki.core.MediaWikiLanguage;
 
 
 /**
@@ -81,9 +82,12 @@ public class FileStorage implements Storage {
   @Override
   public Page getPage( Route route ) throws StorageException {
 
-    File file = new File( baseDir, route + ".page" );
-    if( file.exists() && file.isFile() ) {
-      return new Page( new FileSource( file ), new MediaWikiLanguage() );
+    String name = route.toString();
+    File file = new File( baseDir, name );
+    String extension = Files.getFileExtension( name );
+    Language language = Language.getLanguageForExtension( extension );
+    if( file.exists() && file.isFile() && language != null ) {
+      return new Page( new FileSource( file ), language );
     }
     else {
       return null;
@@ -98,22 +102,13 @@ public class FileStorage implements Storage {
     Collection<Route> result = new ArrayList<Route>();
     File dir = new File( baseDir, "" + route );
     if( dir.exists() && dir.isDirectory() ) {
-      for( File file : dir.listFiles() ) {
-        String fileName = file.getName();
-        if( isPage( file ) ) {
-          fileName = fileName.substring( 0, fileName.lastIndexOf( ".page" ) );
-          result.add( new Route( route, fileName ) );
-        }
+      for( File file : dir.listFiles( Language.createFileFilterForAllLanguages() ) ) {
+        result.add( new Route( route, file.getName() ) );
       }
     }
     
     return result;
     
-  }
-
-
-  private boolean isPage( File file ) {
-    return file.isFile() && file.getName().endsWith( ".page" );
   }
 
 
@@ -139,17 +134,26 @@ public class FileStorage implements Storage {
   @Override
   public RouteInfo getInfo( Route route ) {
     
-    File dir = new File( baseDir, "" + route );
+    File file = new File( baseDir, "" + route );
+    String name = file.getAbsolutePath();
     
-    if( dir.exists() ) {
-      return new RouteInfo( route.toString(), true, false );
+    if( !file.exists() ) {
+      return new RouteInfo( name, false, false );
     }
-    
-    File file = new File( baseDir, "" + route + ".page" );
-    
-    boolean exists = file.exists();
-
-    return new RouteInfo( route.toString(), exists, true );
+    else {
+      if( file.isDirectory() ) {
+        return new RouteInfo( name, true, false );
+      }
+      else {
+        String extension = Files.getFileExtension( name );
+        if( Language.getLanguageForExtension( extension ) == null ) {
+          return new RouteInfo( name, true, false );
+        }
+        else {
+          return new RouteInfo( name, true, true );
+        }
+      }
+    }
     
   }
 
