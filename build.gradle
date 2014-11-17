@@ -57,6 +57,17 @@ repositories {
     // You can declare any Maven/Ivy/file repository here.
     repositories {
 	    mavenCentral()
+	    
+	    // team repo (because it's no public yet)
+		ivy {
+		// there is a lot of legacy to adhere to here:
+		        url 'http://edge/s/repository/maven'
+		        layout 'pattern' , {
+	                artifact '[organisation].[module]/[type]s/[artifact]-[revision](.[ext])'
+	            }
+	    }
+	    
+/*	    
 	    ivy {
 	        url "file:///Users/lars/develop/localrepo"
 	        layout "pattern", {
@@ -64,6 +75,8 @@ repositories {
 	            artifact "[organization]/[artifact]-[revision].[ext]"
 	        }
 	    }
+*/
+
 	}	
 }
 
@@ -109,11 +122,7 @@ dependencies {
     compile (
     	//'org.slf4j:slf4j-api:1.7.5',
     	'commons-io:commons-io:2.4',
-    	'org.eclipse.mylyn.wikitext:org.eclipse.mylyn.wikitext.core:2.3.0.N20140929-1849',
-    	'org.eclipse.mylyn.wikitext:org.eclipse.mylyn.wikitext.html.core:2.3.0.N20140929-1849',
-    	'org.eclipse.mylyn.wikitext:org.eclipse.mylyn.wikitext.mediawiki.core:2.3.0.N20140929-1849',
-    	'org.eclipse.mylyn.wikitext:org.eclipse.mylyn.wikitext.markdown.core:2.3.0.N20140929-1849',
-//    	'com.github.sebhoss.doxia:doxia-wikitext-common:2.0.0',
+    	'com.infodesire:wikitext-all:0.1-SNAPSHOT',
     	'servletapi:servlet-api:2.4',
     	'org.eclipse.jetty:jetty-server:9.2.3.v20140905',
     	'org.eclipse.jetty:jetty-servlet:9.2.3.v20140905',
@@ -122,6 +131,7 @@ dependencies {
     	'org.apache.httpcomponents:httpclient:4.3.5',
     	'log4j:log4j:1.2.17',
     	'com.google.guava:guava:18.0'
+    	
     )
 
     // Declare the dependency for your favourite test framework you want to use in your tests.
