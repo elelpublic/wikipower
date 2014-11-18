@@ -6,7 +6,7 @@ package com.infodesire.wikipower.web;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterators;
-import com.infodesire.wikipower.wiki.Route;
+import com.infodesire.bsmcommons.FilePath;
 
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
@@ -30,13 +30,13 @@ public class PreparedRequest {
 
   private URIBuilder uriBuilder;
   private HttpServletRequest request;
-  private Route route;
+  private FilePath route;
 
 
   public PreparedRequest( HttpServletRequest request ) throws URISyntaxException {
     uriBuilder = parse( request );
     this.request = request;
-    route = Route.parse( uriBuilder.getPath() );
+    route = FilePath.parse( uriBuilder.getPath() );
   }
   
   
@@ -50,7 +50,7 @@ public class PreparedRequest {
   }
   
   
-  public Route getRoute() {
+  public FilePath getRoute() {
     return route;
   }
 

@@ -5,10 +5,10 @@ package com.infodesire.wikipower.storage;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
-import com.infodesire.bsmcommons.BsmStrings;
+import com.infodesire.bsmcommons.FilePath;
+import com.infodesire.bsmcommons.Strings;
 import com.infodesire.wikipower.web.Language;
 import com.infodesire.wikipower.wiki.Page;
-import com.infodesire.wikipower.wiki.Route;
 import com.infodesire.wikipower.wiki.RouteInfo;
 
 import java.io.File;
@@ -81,13 +81,13 @@ public class FileStorage implements Storage {
 
 
   @Override
-  public Page getPage( Route route ) throws StorageException {
+  public Page getPage( FilePath route ) throws StorageException {
 
     String name = route.toString();
     File file = new File( baseDir, name );
     String extension = Files.getFileExtension( name );
     Language language = Language.getLanguageForExtension( extension );
-    String wikiURL = BsmStrings.beforeLast( name, "." + extension );
+    String wikiURL = Strings.beforeLast( name, "." + extension );
     if( file.exists() && file.isFile() && language != null ) {
       return new Page( wikiURL, new FileSource( file ), language );
     }
@@ -99,13 +99,13 @@ public class FileStorage implements Storage {
 
   
   @Override
-  public Collection<Route> listPages( Route route ) throws StorageException {
+  public Collection<FilePath> listPages( FilePath route ) throws StorageException {
     
-    Collection<Route> result = new ArrayList<Route>();
+    Collection<FilePath> result = new ArrayList<FilePath>();
     File dir = new File( baseDir, "" + route );
     if( dir.exists() && dir.isDirectory() ) {
       for( File file : dir.listFiles( Language.createFileFilterForAllLanguages() ) ) {
-        result.add( new Route( route, file.getName() ) );
+        result.add( new FilePath( route, file.getName() ) );
       }
     }
     
@@ -115,15 +115,15 @@ public class FileStorage implements Storage {
 
 
   @Override
-  public Collection<Route> listFolders( Route route ) {
+  public Collection<FilePath> listFolders( FilePath route ) {
 
-    Collection<Route> result = new ArrayList<Route>();
+    Collection<FilePath> result = new ArrayList<FilePath>();
     File dir = new File( baseDir, "" + route );
     if( dir.exists() && dir.isDirectory() ) {
       for( File file : dir.listFiles() ) {
         String fileName = file.getName();
         if( file.isDirectory() ) {
-          result.add( new Route( route, fileName ) );
+          result.add( new FilePath( route, fileName ) );
         }
       }
     }
@@ -134,7 +134,7 @@ public class FileStorage implements Storage {
 
 
   @Override
-  public RouteInfo getInfo( Route route ) {
+  public RouteInfo getInfo( FilePath route ) {
     
     File file = new File( baseDir, "" + route );
     String name = file.getAbsolutePath();

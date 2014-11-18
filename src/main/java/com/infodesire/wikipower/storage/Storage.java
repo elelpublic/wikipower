@@ -3,8 +3,8 @@
 
 package com.infodesire.wikipower.storage;
 
+import com.infodesire.bsmcommons.FilePath;
 import com.infodesire.wikipower.wiki.Page;
-import com.infodesire.wikipower.wiki.Route;
 import com.infodesire.wikipower.wiki.RouteInfo;
 
 import java.util.Collection;
@@ -24,7 +24,7 @@ public interface Storage {
    * @return Page or null if page does not exists
    * 
    */
-  Page getPage( Route route ) throws StorageException;
+  Page getPage( FilePath route ) throws StorageException;
 
   
   /**
@@ -35,7 +35,7 @@ public interface Storage {
    * @throws StorageException
    * 
    */
-  Collection<Route> listPages( Route dir ) throws StorageException;
+  Collection<FilePath> listPages( FilePath dir ) throws StorageException;
 
 
   /**
@@ -46,17 +46,17 @@ public interface Storage {
    * @throws StorageException
    * 
    */
-  Collection<Route> listFolders( Route route ) throws StorageException;
+  Collection<FilePath> listFolders( FilePath route ) throws StorageException;
   
   
   /**
    * Describe a route
    * 
-   * @param route Route
+   * @param route FilePath
    * @return Description
    * 
    */
-  RouteInfo getInfo( Route route ) throws StorageException;
+  RouteInfo getInfo( FilePath route ) throws StorageException;
   
 
 }

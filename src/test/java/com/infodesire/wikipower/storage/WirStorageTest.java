@@ -9,8 +9,8 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.ByteStreams;
+import com.infodesire.bsmcommons.FilePath;
 import com.infodesire.wikipower.wiki.Page;
-import com.infodesire.wikipower.wiki.Route;
 import com.infodesire.wikipower.wiki.RouteInfo;
 
 import java.io.ByteArrayInputStream;
@@ -59,8 +59,8 @@ public class WirStorageTest {
     
     WirStorage s = new WirStorage( tmpFile );
     
-    Route root = new Route();
-    Route sub = new Route( root, "sub" );
+    FilePath root = new FilePath( true );
+    FilePath sub = new FilePath( root, "sub" );
     
     assertTrue( s.getInfo( root ).exists() );
     assertFalse( s.getInfo( root ).isPage() );
@@ -68,22 +68,22 @@ public class WirStorageTest {
     assertTrue( s.getInfo( sub ).exists() );
     assertFalse( s.getInfo( sub ).isPage() );
     
-    Page main = s.getPage( new Route( root, "main.markdown" ) );
+    Page main = s.getPage( new FilePath( root, "main.markdown" ) );
     StringWriter content = new StringWriter();
     main.toHtml( new PrintWriter( content ) );
     assertTrue( containsHtml( "main", content.toString() ) );
     
-    Page sub1 = s.getPage( new Route( sub, "sub1.markdown" ) );
+    Page sub1 = s.getPage( new FilePath( sub, "sub1.markdown" ) );
     content = new StringWriter();
     sub1.toHtml( new PrintWriter( content ) );
     assertTrue( containsHtml( "sub1", content.toString() ) );
     
-    List<Route> pages = s.listPages( root );
+    List<FilePath> pages = s.listPages( root );
     assertEquals( 1, pages.size() );
     assertEquals( "main.markdown", pages.get( 0 ).toString() );
     assertEquals( "main", s.getPage( pages.get( 0 ) ).getWikiURL() );
     
-    List<Route> folders = s.listFolders( root );
+    List<FilePath> folders = s.listFolders( root );
     assertEquals( 1, folders.size() );
     assertEquals( "sub", folders.get( 0 ).toString() );
     RouteInfo info = s.getInfo( root );

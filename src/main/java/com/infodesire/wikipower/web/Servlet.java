@@ -4,10 +4,10 @@
 package com.infodesire.wikipower.web;
 
 import com.google.common.base.Throwables;
+import com.infodesire.bsmcommons.FilePath;
 import com.infodesire.wikipower.storage.FileStorage;
 import com.infodesire.wikipower.storage.Storage;
 import com.infodesire.wikipower.wiki.Page;
-import com.infodesire.wikipower.wiki.Route;
 import com.infodesire.wikipower.wiki.RouteInfo;
 
 import java.io.File;
@@ -43,7 +43,7 @@ public class Servlet extends HttpServlet {
 
       PreparedRequest request = new PreparedRequest( httpRequest );
       
-      Route route = request.getRoute();
+      FilePath route = request.getRoute();
       
       // remove the leading 'wikipower'
       route = route.removeFirst();
@@ -51,7 +51,7 @@ public class Servlet extends HttpServlet {
       if( route.toString().equals( "debug" ) ) {
         debug( request, response );
       }
-      else if( route.size() > 0 && route.getFirst().equals( "wiki" ) ) {
+      else if( route.size() > 0 && route.getElement( 0 ).equals( "wiki" ) ) {
         route = route.removeFirst();
         RouteInfo info = storage.getInfo( route );
         if( !info.exists() ) {
@@ -83,7 +83,7 @@ public class Servlet extends HttpServlet {
   }
 
 
-  private void showListing( HttpServletResponse response, Route route ) throws IOException {
+  private void showListing( HttpServletResponse response, FilePath route ) throws IOException {
 
     response.setContentType( "text/html;charset=utf-8" );
     response.setStatus( HttpServletResponse.SC_OK );
@@ -97,15 +97,15 @@ public class Servlet extends HttpServlet {
 
     writer.println( "<h2>Pages</h2>" );
     writer.println( "<div>" );
-    for( Route subRoute : storage.listPages( route ) ) {
-      writer.println( "<a href=\"" + subRoute + "\">" + subRoute.getLast() + "</a><br>" );
+    for( FilePath subFilePath : storage.listPages( route ) ) {
+      writer.println( "<a href=\"" + subFilePath + "\">" + subFilePath.getLast() + "</a><br>" );
     }
     writer.println( "</div>" );
     
     writer.println( "<h2>Folders</h2>" );
     writer.println( "<div>" );
-    for( Route subRoute : storage.listFolders( route ) ) {
-      writer.println( "<a href=\"" + subRoute + "\">" + subRoute.getLast() + "/</a><br>" );
+    for( FilePath subFilePath : storage.listFolders( route ) ) {
+      writer.println( "<a href=\"" + subFilePath + "\">" + subFilePath.getLast() + "/</a><br>" );
     }
     writer.println( "</div>" );
 
@@ -170,7 +170,7 @@ public class Servlet extends HttpServlet {
   }
   
   
-  private void notFoundPage( HttpServletResponse response, Route route )
+  private void notFoundPage( HttpServletResponse response, FilePath route )
     throws IOException {
 
     response.setContentType( "text/html;charset=utf-8" );
@@ -201,7 +201,7 @@ public class Servlet extends HttpServlet {
 //    writer.println( "<h1>Welcome to Wikipower</h1>" );
 //    writer.println( "<div>" );
 //    
-////    for( Route route : storage.listPages( new Route() ) ) {
+////    for( FilePath route : storage.listPages( new FilePath() ) ) {
 ////      writer.println( "<a href=\"wiki/" + route + "\">" + route.getLast() + "</a>" );
 ////    }
 //    

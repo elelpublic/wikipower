@@ -4,16 +4,16 @@
 package com.infodesire.wikipower.storage;
 
 import com.google.common.io.Files;
-import com.infodesire.bsmcommons.BsmStrings;
+import com.infodesire.bsmcommons.FilePath;
+import com.infodesire.bsmcommons.Strings;
+import com.infodesire.bsmcommons.ZipIndex;
 import com.infodesire.wikipower.web.Language;
 import com.infodesire.wikipower.wiki.Page;
-import com.infodesire.wikipower.wiki.Route;
 import com.infodesire.wikipower.wiki.RouteInfo;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -29,13 +29,15 @@ public class WirStorage implements Storage {
   
   
   private ZipFile zipFile;
+  private ZipIndex zipIndex;
 
   public WirStorage( File wirFile ) throws ZipException, IOException {
     zipFile = new ZipFile( wirFile );
+    zipIndex = new ZipIndex( wirFile, true /* implicit folders */, true /* relativePaths */ );
   }
 
   @Override
-  public Page getPage( Route route ) throws StorageException {
+  public Page getPage( FilePath route ) throws StorageException {
     try {
       ZipEntry entry = zipFile.getEntry( route.toString() );
       InputStream in = zipFile.getInputStream( entry );
@@ -45,7 +47,7 @@ public class WirStorage implements Storage {
         return null;
       }
       String name = route.getLast();
-      name = BsmStrings.beforeLast( name, "." + extension );
+      name = Strings.beforeLast( name, "." + extension );
       return new Page( name, new InputStreamMarkupSource( in ), language );
     }
     catch( IOException ex ) {
@@ -54,40 +56,19 @@ public class WirStorage implements Storage {
   }
 
   @Override
-  public List<Route> listPages( Route dir ) {
-    return list( dir, false );
+  public List<FilePath> listPages( FilePath dir ) {
+    return zipIndex.listFiles( dir );
   }
 
   @Override
-  public List<Route> listFolders( Route route ) {
-    return list( route, true );
+  public List<FilePath> listFolders( FilePath dir ) {
+    return zipIndex.listFolders( dir );
   }
 
-  private List<Route> list( Route route, boolean folder ) {
-    String path = route.toString();
-    Enumeration<? extends ZipEntry> e = zipFile.entries();
-    List<Route> result = new ArrayList<Route>();
-    while( e.hasMoreElements() ) {
-      ZipEntry entry = e.nextElement();
-      String name = entry.getName();
-      if( name.startsWith( path ) ) {
-        if( !name.equals( path ) ) {
-          if( ( folder && entry.isDirectory() )
-            || ( !folder && !entry.isDirectory() ) ) {
-            Route newRoute = Route.parse( name );
-            if( route.isDirectParentOf( newRoute ) ) {
-              result.add( newRoute );
-            }
-          }
-        }
-      }
-    }
-    return result;
-  }
 
   @Override
-  public RouteInfo getInfo( Route route ) {
-    if( route.isRoot() ) {
+  public RouteInfo getInfo( FilePath route ) {
+    if( route.isBase() ) {
       return new RouteInfo( "", true, false );
     }
     String path = route.toString();
