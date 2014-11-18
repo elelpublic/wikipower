@@ -5,6 +5,7 @@ package com.infodesire.wikipower.storage;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
+import com.infodesire.bsmcommons.BsmStrings;
 import com.infodesire.wikipower.web.Language;
 import com.infodesire.wikipower.wiki.Page;
 import com.infodesire.wikipower.wiki.Route;
@@ -23,7 +24,7 @@ import org.apache.log4j.Logger;
 
 
 /**
- * Manage wiki pages in files
+ * Manage wiki pages in a file system
  *
  */
 public class FileStorage implements Storage {
@@ -86,8 +87,9 @@ public class FileStorage implements Storage {
     File file = new File( baseDir, name );
     String extension = Files.getFileExtension( name );
     Language language = Language.getLanguageForExtension( extension );
+    String wikiURL = BsmStrings.beforeLast( name, "." + extension );
     if( file.exists() && file.isFile() && language != null ) {
-      return new Page( new FileSource( file ), language );
+      return new Page( wikiURL, new FileSource( file ), language );
     }
     else {
       return null;

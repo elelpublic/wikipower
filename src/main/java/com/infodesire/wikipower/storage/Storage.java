@@ -24,7 +24,7 @@ public interface Storage {
    * @return Page or null if page does not exists
    * 
    */
-  Page getPage( Route route );
+  Page getPage( Route route ) throws StorageException;
 
   
   /**
@@ -35,7 +35,7 @@ public interface Storage {
    * @throws StorageException
    * 
    */
-  Collection<Route> listPages( Route dir );
+  Collection<Route> listPages( Route dir ) throws StorageException;
 
 
   /**
@@ -46,7 +46,7 @@ public interface Storage {
    * @throws StorageException
    * 
    */
-  Collection<Route> listFolders( Route route );
+  Collection<Route> listFolders( Route route ) throws StorageException;
   
   
   /**
@@ -56,9 +56,7 @@ public interface Storage {
    * @return Description
    * 
    */
-  RouteInfo getInfo( Route route );
-
-
+  RouteInfo getInfo( Route route ) throws StorageException;
   
 
 }

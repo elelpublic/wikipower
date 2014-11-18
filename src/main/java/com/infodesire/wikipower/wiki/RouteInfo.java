@@ -20,10 +20,14 @@ public class RouteInfo {
     this.isPage = isPage;
   }
 
+  public String getName() {
+    return name;
+  }
+
   public boolean exists() {
     return exists;
   }
-
+  
   public boolean isPage() {
     return isPage;
   }

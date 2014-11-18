@@ -123,6 +123,7 @@ dependencies {
     	//'org.slf4j:slf4j-api:1.7.5',
     	'commons-io:commons-io:2.4',
     	'com.infodesire:wikitext-all:0.1-SNAPSHOT',
+    	'com.infodesire:bsmcommons:0.1-SNAPSHOT',
     	'servletapi:servlet-api:2.4',
     	'org.eclipse.jetty:jetty-server:9.2.3.v20140905',
     	'org.eclipse.jetty:jetty-servlet:9.2.3.v20140905',

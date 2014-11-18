@@ -31,7 +31,11 @@ public class Page {
   private String html;
 
 
-  public Page( MarkupSource source, Language language ) {
+  private String wikiURL;
+
+
+  public Page( String wikiURL, MarkupSource source, Language language ) {
+    this.wikiURL = wikiURL;
     this.source = source;
     this.language = language;
   }
@@ -59,6 +63,28 @@ public class Page {
     
     writer.println( html );
     
+  }
+
+
+  /**
+   * URL of this page in the wiki.
+   * <p>
+   * No Wiki-Base-Adresse and no file extension!
+   * <p>
+   * 
+   * http://mywikiserver/wiki/sub/page1.markdown
+   * <p>
+   * 
+   * Will translate into:
+   * <p>
+   * 
+   * sub/page1
+   * 
+   * @return URL of this page in the wiki. 
+   * 
+   */
+  public String getWikiURL() {
+    return wikiURL;
   }
 
 

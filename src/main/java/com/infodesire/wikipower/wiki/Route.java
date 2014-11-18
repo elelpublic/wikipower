@@ -5,7 +5,6 @@ package com.infodesire.wikipower.wiki;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,11 +77,45 @@ public class Route {
   public static Route parse( String path ) {
     List<String> elements = new ArrayList<String>();
     for( String routeElement : Splitter.on( "/" ).split( path ) ) {
-      if( !Strings.isNullOrEmpty( routeElement ) ) {
-        elements.add( routeElement );
+      if( routeElement != null ) {
+        routeElement = routeElement.trim();
+        if( routeElement.length() > 0 ) {
+          elements.add( routeElement );
+        }
       }
     }
     return new Route( elements );
+  }
+
+
+  /**
+   * @param childRoute
+   * @return This route is the direct parent oth the child route
+   * 
+   */
+  public boolean isDirectParentOf( Route childRoute ) {
+    
+    String childPath = childRoute.toString();
+    String path = toString();
+    
+    if( childPath.startsWith( path ) ) {
+      if( childPath.equals( path ) ) {
+        return false;
+      }
+      else {
+        String remainder = childPath.substring( path.length() + 1);
+        return remainder.indexOf( '/' ) == -1;
+      }
+    }
+    else {
+      return false;
+    }
+    
+  }
+
+
+  public boolean isRoot() {
+    return elements.isEmpty();
   }
 
 
