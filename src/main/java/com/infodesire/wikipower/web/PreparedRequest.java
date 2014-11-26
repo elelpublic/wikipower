@@ -6,7 +6,7 @@ package com.infodesire.wikipower.web;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterators;
-import com.infodesire.bsmcommons.FilePath;
+import com.infodesire.bsmcommons.file.FilePath;
 
 import java.io.PrintWriter;
 import java.net.URISyntaxException;

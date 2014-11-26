@@ -13,7 +13,7 @@ import java.io.File;
 public class Wikipower {
   
   
-  public static void serveWir( int port, File wirFile ) {
+  public static void serveWikipack( int port, File wikipackFile ) {
     
   }
   

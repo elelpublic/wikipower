@@ -4,7 +4,7 @@
 package com.infodesire.wikipower.web;
 
 import com.google.common.base.Throwables;
-import com.infodesire.bsmcommons.FilePath;
+import com.infodesire.bsmcommons.file.FilePath;
 import com.infodesire.wikipower.storage.FileStorage;
 import com.infodesire.wikipower.storage.Storage;
 import com.infodesire.wikipower.wiki.Page;

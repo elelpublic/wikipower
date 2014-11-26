@@ -5,8 +5,8 @@ package com.infodesire.wikipower.storage;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
-import com.infodesire.bsmcommons.FilePath;
 import com.infodesire.bsmcommons.Strings;
+import com.infodesire.bsmcommons.file.FilePath;
 import com.infodesire.wikipower.web.Language;
 import com.infodesire.wikipower.wiki.Page;
 import com.infodesire.wikipower.wiki.RouteInfo;

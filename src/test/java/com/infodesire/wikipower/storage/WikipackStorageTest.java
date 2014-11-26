@@ -7,9 +7,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.ByteStreams;
-import com.infodesire.bsmcommons.FilePath;
+import com.infodesire.bsmcommons.file.FilePath;
+import com.infodesire.bsmcommons.io.Bytes;
+import com.infodesire.bsmcommons.io.Charsets;
 import com.infodesire.wikipower.wiki.Page;
 import com.infodesire.wikipower.wiki.RouteInfo;
 
@@ -31,7 +31,7 @@ import org.junit.Test;
 
 
 
-public class WirStorageTest {
+public class WikipackStorageTest {
 
 
   @Before
@@ -47,7 +47,7 @@ public class WirStorageTest {
   @Test
   public void test() throws IOException, InstantiationException, IllegalAccessException {
     
-    File tmpFile = File.createTempFile( "WirStorageTest", "" );
+    File tmpFile = File.createTempFile( "WikipackStorageTest", ".wikipack" );
     OutputStream outputStream = new FileOutputStream( tmpFile );
     ZipOutputStream zipOut = new ZipOutputStream( outputStream );
     zipFile( zipOut, "main.markdown", "main" );
@@ -57,7 +57,7 @@ public class WirStorageTest {
     
     zipOut.close();
     
-    WirStorage s = new WirStorage( tmpFile );
+    WikipackStorage s = new WikipackStorage( tmpFile );
     
     FilePath root = new FilePath( true );
     FilePath sub = new FilePath( root, "sub" );
@@ -108,7 +108,7 @@ public class WirStorageTest {
     
     zipOut.putNextEntry( new ZipEntry( fileName ) );
     InputStream from = new ByteArrayInputStream( content.getBytes( Charsets.UTF_8 ));
-    ByteStreams.copy( from, zipOut );
+    Bytes.pipe( from, zipOut );
 
   }
 
