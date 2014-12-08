@@ -7,7 +7,7 @@ import com.google.common.io.Files;
 import com.infodesire.bsmcommons.Strings;
 import com.infodesire.bsmcommons.file.FilePath;
 import com.infodesire.bsmcommons.zip.ZipIndex;
-import com.infodesire.wikipower.web.Language;
+import com.infodesire.wikipower.wiki.Language;
 import com.infodesire.wikipower.wiki.Page;
 import com.infodesire.wikipower.wiki.RouteInfo;
 
@@ -30,16 +30,26 @@ public class WikipackStorage implements Storage {
   
   private ZipFile zipFile;
   private ZipIndex zipIndex;
+  private String defaultExtension;
 
-  public WikipackStorage( File wikipackFile ) throws ZipException, IOException {
+  public WikipackStorage( File wikipackFile, String defaultExtension ) throws ZipException, IOException {
     zipFile = new ZipFile( wikipackFile );
     zipIndex = new ZipIndex( wikipackFile, true /* implicit folders */, true /* relativePaths */ );
+    this.defaultExtension = defaultExtension;
   }
 
   @Override
   public Page getPage( FilePath route ) throws StorageException {
     try {
+      if( !Strings.isEmpty( defaultExtension )
+        && route.getLast().indexOf( '.' ) == -1 ) {
+        route = new FilePath( route.getParent(), route.getLast() + '.'
+          + defaultExtension );
+      }
       ZipEntry entry = zipFile.getEntry( route.toString() );
+      if( entry == null ) {
+        return null;
+      }
       InputStream in = zipFile.getInputStream( entry );
       String extension = Files.getFileExtension( entry.getName() );
       Language language = Language.getLanguageForExtension( extension );

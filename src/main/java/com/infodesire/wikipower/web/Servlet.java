@@ -33,7 +33,7 @@ public class Servlet extends HttpServlet {
 
 
   private static Storage storage = new FileStorage( new File(
-    System.getProperty( "user.home" ), ".wikipower/data" ) );
+    System.getProperty( "user.home" ), ".wikipower/data" ), "markdown" );
 
 
   protected void doGet( HttpServletRequest httpRequest,

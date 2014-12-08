@@ -7,56 +7,51 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.io.Files;
 import com.infodesire.bsmcommons.file.FilePath;
-import com.infodesire.bsmcommons.io.Bytes;
-import com.infodesire.bsmcommons.io.Charsets;
 import com.infodesire.wikipower.wiki.Page;
 import com.infodesire.wikipower.wiki.RouteInfo;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.util.Collection;
 
+import org.codehaus.plexus.util.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 
-public class WikipackStorageTest {
+public class FileStorageTest {
 
+
+  private File tempDir;
 
   @Before
   public void setUp() throws Exception {
+    tempDir = Files.createTempDir();
   }
 
 
   @After
   public void tearDown() throws Exception {
+    FileUtils.deleteDirectory( tempDir );
   }
 
 
   @Test
   public void test() throws IOException, InstantiationException, IllegalAccessException {
     
-    File tmpFile = File.createTempFile( "WikipackStorageTest", ".wikipack" );
-    OutputStream outputStream = new FileOutputStream( tmpFile );
-    ZipOutputStream zipOut = new ZipOutputStream( outputStream );
-    zipFile( zipOut, "main.markdown", "main" );
-    zipFile( zipOut, "sub/sub1.markdown", "sub1" );
-    zipFile( zipOut, "sub/sub2.markdown", "sub2" );
-    zipFile( zipOut, "sub/sub/subsub.markdown", "subsub" );
+    store( "main.markdown", "main" );
+    store( "sub/sub1.markdown", "sub1" );
+    store( "sub/sub2.markdown", "sub2" );
+    store( "sub/sub/subsub.markdown", "subsub" );
     
-    zipOut.close();
     
-    WikipackStorage s = new WikipackStorage( tmpFile, "markdown" );
+    FileStorage s = new FileStorage( tempDir, "markdown" );
     
     FilePath root = new FilePath( true );
     FilePath sub = new FilePath( root, "sub" );
@@ -77,14 +72,16 @@ public class WikipackStorageTest {
     sub1.toHtml( new PrintWriter( content ) );
     assertTrue( containsHtml( "sub1", content.toString() ) );
     
-    List<FilePath> pages = s.listPages( root );
+    Collection<FilePath> pages = s.listPages( root );
     assertEquals( 1, pages.size() );
-    assertEquals( "main.markdown", pages.get( 0 ).toString() );
-    assertEquals( "main", s.getPage( pages.get( 0 ) ).getWikiURL() );
+    FilePath page = pages.iterator().next();
+    assertEquals( "main.markdown", page.toString() );
+    assertEquals( "main", s.getPage( page ).getWikiURL() );
     
-    List<FilePath> folders = s.listFolders( root );
+    Collection<FilePath> folders = s.listFolders( root );
     assertEquals( 1, folders.size() );
-    assertEquals( "sub", folders.get( 0 ).toString() );
+    FilePath folder = folders.iterator().next();
+    assertEquals( "sub", folder.toString() );
     RouteInfo info = s.getInfo( root );
     assertEquals( "", info.getName() );
     assertTrue( info.exists() );
@@ -92,6 +89,18 @@ public class WikipackStorageTest {
     
   }
   
+  
+  private void store( String path, String content ) throws IOException {
+  
+    File file = new File( tempDir, path );
+    file.getParentFile().mkdirs();
+    PrintWriter out = new PrintWriter( new FileWriter( file ) );
+    out.println( content );
+    out.close();
+    
+  }
+
+
   private boolean containsHtml( String string, String content ) {
     
     int body = content.indexOf( "<body>" );
@@ -102,12 +111,5 @@ public class WikipackStorageTest {
     
   }
 
-  private void zipFile( ZipOutputStream zipOut, String fileName, String content ) throws IOException {
-    
-    zipOut.putNextEntry( new ZipEntry( fileName ) );
-    InputStream from = new ByteArrayInputStream( content.getBytes( Charsets.UTF_8 ));
-    Bytes.pipe( from, zipOut );
-
-  }
 
 }

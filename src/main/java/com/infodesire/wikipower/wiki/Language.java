@@ -1,7 +1,7 @@
 // (C) 1998-2015 Information Desire Software GmbH
 // www.infodesire.com
 
-package com.infodesire.wikipower.web;
+package com.infodesire.wikipower.wiki;
 
 import com.google.common.io.Files;
 

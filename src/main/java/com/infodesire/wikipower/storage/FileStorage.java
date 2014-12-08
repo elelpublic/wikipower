@@ -7,7 +7,7 @@ import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import com.infodesire.bsmcommons.Strings;
 import com.infodesire.bsmcommons.file.FilePath;
-import com.infodesire.wikipower.web.Language;
+import com.infodesire.wikipower.wiki.Language;
 import com.infodesire.wikipower.wiki.Page;
 import com.infodesire.wikipower.wiki.RouteInfo;
 
@@ -36,8 +36,13 @@ public class FileStorage implements Storage {
   private File baseDir;
 
 
-  public FileStorage( File baseDir ) {
+  private String defaultExtension;
+
+
+  public FileStorage( File baseDir, String defaultExtension  ) {
+    
     this.baseDir = baseDir;
+    this.defaultExtension = defaultExtension;
     
     if( !baseDir.exists() ) {
       init();
@@ -82,6 +87,12 @@ public class FileStorage implements Storage {
 
   @Override
   public Page getPage( FilePath route ) throws StorageException {
+    
+    if( !Strings.isEmpty( defaultExtension )
+      && route.getLast().indexOf( '.' ) == -1 ) {
+      route = new FilePath( route.getParent(), route.getLast() + '.'
+        + defaultExtension );
+    }
 
     String name = route.toString();
     File file = new File( baseDir, name );
@@ -137,7 +148,7 @@ public class FileStorage implements Storage {
   public RouteInfo getInfo( FilePath route ) {
     
     File file = new File( baseDir, "" + route );
-    String name = file.getAbsolutePath();
+    String name = route.toString();
     
     if( !file.exists() ) {
       return new RouteInfo( name, false, false );

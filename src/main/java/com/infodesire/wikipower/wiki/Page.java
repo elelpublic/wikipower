@@ -4,7 +4,6 @@
 package com.infodesire.wikipower.wiki;
 
 import com.infodesire.wikipower.storage.MarkupSource;
-import com.infodesire.wikipower.web.Language;
 
 import java.io.IOException;
 import java.io.PrintWriter;
