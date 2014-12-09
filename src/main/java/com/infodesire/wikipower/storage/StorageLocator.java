@@ -46,6 +46,9 @@ public class StorageLocator {
         url = Strings.after( url, "//" );
       }
       InputStream in = StorageLocator.class.getResourceAsStream( url );
+      if( in == null ) {
+        throw new StorageException( "Not found: " + url );
+      }
       return createStorageFromTempFile( in, defaultExtension );
 
     }

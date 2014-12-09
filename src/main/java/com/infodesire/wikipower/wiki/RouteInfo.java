@@ -34,10 +34,10 @@ public class RouteInfo {
   
   public String toString() {
     if( !exists ) {
-      return name + " does not exists";
+      return "'" + name + "' does not exists";
     }
     else {
-      return name + " " + ( isPage ? "is a page" : "is a folder" );
+      return "'" + name + "' " + ( isPage ? "is a page" : "is a folder" );
     }
   }
 

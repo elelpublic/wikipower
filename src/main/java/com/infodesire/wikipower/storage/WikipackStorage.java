@@ -14,6 +14,7 @@ import com.infodesire.wikipower.wiki.RouteInfo;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -22,7 +23,7 @@ import java.util.zip.ZipFile;
 
 
 /**
- * Storage based on a *.wikiack file. 
+ * Storage based on a *.wikipack file. 
  *
  */
 public class WikipackStorage implements Storage {
@@ -82,23 +83,29 @@ public class WikipackStorage implements Storage {
       return new RouteInfo( "", true, false );
     }
     String path = route.toString();
-    ZipEntry entry = zipFile.getEntry( path );
-    if( entry == null ) {
-      // check for dirs, which are not there themselves but as parents of files
-      Enumeration<? extends ZipEntry> e = zipFile.entries();
-      String dirName = path + "/";
-      while( e.hasMoreElements() ) {
-        entry = e.nextElement();
-        String name = entry.getName();
-        if( name.startsWith( dirName ) ) {
-          return new RouteInfo( route.toString(), true, false );
-        }
-      }
+    boolean exists = zipIndex.exists( path );
+    boolean isPage = false;
+    if( exists ) {
+      isPage = zipIndex.isFile( path );
     }
-    boolean exists = entry != null;
-    boolean isDir = exists && entry.isDirectory();
-    String name = route.getLast();
-    return new RouteInfo( name, exists, !isDir );
+    return new RouteInfo( path, exists, isPage );
+//    ZipEntry entry = zipFile.getEntry( path );
+//    if( entry == null ) {
+//      // check for dirs, which are not there themselves but as parents of files
+//      Enumeration<? extends ZipEntry> e = zipFile.entries();
+//      String dirName = path + "/";
+//      while( e.hasMoreElements() ) {
+//        entry = e.nextElement();
+//        String name = entry.getName();
+//        if( name.startsWith( dirName ) ) {
+//          return new RouteInfo( route.toString(), true, false );
+//        }
+//      }
+//    }
+//    boolean exists = entry != null;
+//    boolean isDir = exists && entry.isDirectory();
+//    String name = route.getLast();
+//    return new RouteInfo( name, exists, !isDir );
   }
   
   protected void finalize() {
@@ -120,6 +127,11 @@ public class WikipackStorage implements Storage {
       sep = "\n";
     }
     return ls;
+  }
+
+  @Override
+  public void createListing( PrintWriter out, String lineSeparator ) throws StorageException {
+    zipIndex.createListing( out, lineSeparator );
   }
 
 }

@@ -7,6 +7,7 @@ import com.infodesire.bsmcommons.file.FilePath;
 import com.infodesire.wikipower.wiki.Page;
 import com.infodesire.wikipower.wiki.RouteInfo;
 
+import java.io.PrintWriter;
 import java.util.Collection;
 
 
@@ -57,6 +58,14 @@ public interface Storage {
    * 
    */
   RouteInfo getInfo( FilePath route ) throws StorageException;
+  
+  
+  /**
+   * Generate full listing of contents
+   * @param out Target for listing 
+   * 
+   */
+  void createListing( PrintWriter out, String lineSeparator ) throws StorageException;
   
 
 }

@@ -50,6 +50,7 @@ public class WikipackStorageTest {
     OutputStream outputStream = new FileOutputStream( tmpFile );
     ZipOutputStream zipOut = new ZipOutputStream( outputStream );
     zipFile( zipOut, "main.markdown", "main" );
+    zipDir( zipOut, "sub" );
     zipFile( zipOut, "sub/sub1.markdown", "sub1" );
     zipFile( zipOut, "sub/sub2.markdown", "sub2" );
     zipFile( zipOut, "sub/sub/subsub.markdown", "subsub" );
@@ -110,4 +111,13 @@ public class WikipackStorageTest {
 
   }
 
+  private void zipDir( ZipOutputStream zipOut, String fileName ) throws IOException {
+    
+    if( !fileName.endsWith( "/" ) ) {
+      fileName += "/";
+    }
+    zipOut.putNextEntry( new ZipEntry( fileName ) );
+    
+  }
+  
 }

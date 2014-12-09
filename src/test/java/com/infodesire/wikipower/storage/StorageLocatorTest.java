@@ -3,7 +3,7 @@
 
 package com.infodesire.wikipower.storage;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import com.google.common.io.Files;
 import com.infodesire.bsmcommons.file.FilePath;
@@ -77,6 +77,12 @@ public class StorageLocatorTest {
     assertPageContent( s, "main.markdown", "main" );
     assertPageContent( s, "sub/sub/subsub.markdown", "subsub" );
 
+    try {
+      s = StorageLocator.locateStorage( "classpath:///sample1.wikipack", null );
+      fail( "No storage exception thrown when resource not found" );
+    }
+    catch( StorageException ex ) {}
+    
   }
 
   private void assertPageContent( Storage s, String path, String html ) throws InstantiationException, IllegalAccessException, IOException {

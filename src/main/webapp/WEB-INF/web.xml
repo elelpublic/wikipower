@@ -16,7 +16,7 @@
         <servlet-class>com.infodesire.wikipower.web.Servlet</servlet-class>
 				<init-param>
 					<param-name>wikiDataURL</param-name>
-					<param-value>classpath:sample-wiki.zip</param-value>
+					<param-value>classpath:///sample-wiki.zip</param-value>
 				</init-param>
     </servlet>
 

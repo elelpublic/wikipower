@@ -6,22 +6,15 @@ package com.infodesire.wikipower.web;
 import com.google.common.base.Throwables;
 import com.infodesire.bsmcommons.Strings;
 import com.infodesire.bsmcommons.file.FilePath;
-import com.infodesire.bsmcommons.io.Bytes;
-import com.infodesire.wikipower.storage.FileStorage;
 import com.infodesire.wikipower.storage.Storage;
-import com.infodesire.wikipower.storage.WikipackStorage;
+import com.infodesire.wikipower.storage.StorageException;
+import com.infodesire.wikipower.storage.StorageLocator;
 import com.infodesire.wikipower.wiki.Page;
 import com.infodesire.wikipower.wiki.RouteInfo;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -131,7 +124,7 @@ public class Servlet extends HttpServlet {
   }
 
 
-  private void debug( PreparedRequest request , HttpServletResponse response ) throws IOException {
+  private void debug( PreparedRequest request, HttpServletResponse response ) throws IOException {
 
     response.setContentType( "text/html;charset=utf-8" );
     response.setStatus( HttpServletResponse.SC_OK );
@@ -145,6 +138,9 @@ public class Servlet extends HttpServlet {
     writer.println( "<div>" );
 
     request.toHTML( writer );
+    
+    writer.println( "<h2>Wiki listing</h2>" );
+    storage.createListing( writer, "<br>" );
     
     writer.println( "</div>" );
     foot( writer );
@@ -263,44 +259,10 @@ public class Servlet extends HttpServlet {
     String defaultExtension = config.getInitParameter( "defaultExtension" );
     if( !Strings.isEmpty( wikiDataURL ) ) {
       try {
-//        URLStreamHandlerFactory factory = new URLStreamHandlerFactory() {
-//          @Override
-//          public URLStreamHandler createURLStreamHandler( String protocol ) {
-//            if( protocol.equals( "classpath" ) ) {
-//              return new URLStreamHandler() {
-//                @Override
-//                protected URLConnection openConnection( URL u ) throws IOException {
-//                }
-//              };
-//            }
-//            else {
-//              return null;
-//            }
-//          }
-//        };
-//        URL.setURLStreamHandlerFactory( factory );
-        URL url = new URL( wikiDataURL );
-        if( wikiDataURL.endsWith( ".wikipack" ) ) {
-          InputStream in = url.openConnection().getInputStream();
-          File tempZipFile = File.createTempFile( "tmp-", ".wikipack" );
-          OutputStream out = new FileOutputStream( tempZipFile );
-          Bytes.pipe( in, out );
-          in.close();
-          out.close();
-          storage = new WikipackStorage( tempZipFile, defaultExtension );
-        }
-        else if( url.getProtocol().equals( "file" ) ) {
-          storage = new FileStorage( new File( url.getFile() ), defaultExtension ); 
-        }
-        throw new ServletException(
-          "Invalid wikiDataURL. Must be either a local directory or a *.wikipack file: "
-            + wikiDataURL );
+        storage = StorageLocator.locateStorage( wikiDataURL, defaultExtension );
       }
-      catch( MalformedURLException ex ) {
+      catch( StorageException ex ) {
         throw new ServletException( "Invalid wikiDataURL: " + wikiDataURL, ex );
-      }
-      catch( IOException ex ) {
-        throw new ServletException( "Error accessing wiki data: " + wikiDataURL, ex );
       }
     }
     

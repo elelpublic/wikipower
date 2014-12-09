@@ -6,6 +6,7 @@ package com.infodesire.wikipower.storage;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import com.infodesire.bsmcommons.Strings;
+import com.infodesire.bsmcommons.file.FileIndex;
 import com.infodesire.bsmcommons.file.FilePath;
 import com.infodesire.wikipower.wiki.Language;
 import com.infodesire.wikipower.wiki.Page;
@@ -15,6 +16,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.zip.ZipEntry;
@@ -168,6 +170,12 @@ public class FileStorage implements Storage {
       }
     }
     
+  }
+
+
+  @Override
+  public void createListing( PrintWriter out, String lineSeparator ) throws StorageException {
+    new FileIndex( baseDir ).createListing( out, lineSeparator );
   }
 
 
