@@ -83,6 +83,9 @@ public class Servlet extends HttpServlet {
         if( route.toString().equals( ".debug" ) ) {
           debug( request, response );
         }
+        else if( route.toString().equals( ".index" ) ) {
+          showListing( response, FilePath.parse( "" ) );
+        }
         else {
           notFoundPage( response, route );
         }
@@ -143,7 +146,9 @@ public class Servlet extends HttpServlet {
 
 
   private void navigation( PrintWriter writer ) throws IOException {
-    writer.println( "<a href=\""+ baseURI +"\">Home</a><hr>" );
+    writer.println( "<a href=\""+ baseURI +"\">Home</a> " );
+    writer.println( " &nbsp; " );
+    writer.println( " <a href=\""+ baseURI +"/.index\">Index</a> <hr>" );
   }
 
 
