@@ -12,6 +12,8 @@ import com.infodesire.bsmcommons.io.Charsets;
 import com.infodesire.bsmcommons.io.PrintStringWriter;
 import com.infodesire.bsmcommons.zip.Unzip;
 import com.infodesire.wikipower.wiki.Page;
+import com.infodesire.wikipower.wiki.RenderConfig;
+import com.infodesire.wikipower.wiki.Renderer;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -31,12 +33,14 @@ import org.junit.Test;
 
 public class StorageLocatorTest {
 
-
   private File tempDir;
+  private Renderer renderer;
 
   @Before
   public void setUp() throws Exception {
     tempDir = Files.createTempDir();
+    RenderConfig config = new RenderConfig();
+    renderer = new Renderer( config );
   }
 
 
@@ -89,7 +93,7 @@ public class StorageLocatorTest {
 
     Page p = s.getPage( FilePath.parse( path ) );
     PrintStringWriter content = new PrintStringWriter();
-    p.toHtml( content );
+    renderer.render( p, content );
     assertTrue( "Expected somewhat like " + html + " but found " + content,
       containsHtml( html, content.toString() ) );
     

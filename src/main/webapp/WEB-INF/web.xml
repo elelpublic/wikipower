@@ -18,6 +18,18 @@
 					<param-name>wikiDataURL</param-name>
 					<param-value>classpath:///sample-wiki.zip</param-value>
 				</init-param>
+				<init-param>
+					<param-name>defaultExtension</param-name>
+					<param-value>markdown</param-value>
+				</init-param>
+				<init-param>
+					<param-name>baseURI</param-name>
+					<param-value>/wikipower</param-value>
+				</init-param>
+				<init-param>
+					<param-name>useCache</param-name>
+					<param-value>true</param-value>
+				</init-param>
     </servlet>
 
     <servlet-mapping>

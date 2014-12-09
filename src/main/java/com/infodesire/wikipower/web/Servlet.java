@@ -10,6 +10,8 @@ import com.infodesire.wikipower.storage.Storage;
 import com.infodesire.wikipower.storage.StorageException;
 import com.infodesire.wikipower.storage.StorageLocator;
 import com.infodesire.wikipower.wiki.Page;
+import com.infodesire.wikipower.wiki.RenderConfig;
+import com.infodesire.wikipower.wiki.Renderer;
 import com.infodesire.wikipower.wiki.RouteInfo;
 
 import java.io.IOException;
@@ -40,6 +42,12 @@ public class Servlet extends HttpServlet {
   private static Storage storage;
 
 
+  private Renderer renderer;
+
+
+  private String baseURI;
+
+
   protected void doGet( HttpServletRequest httpRequest,
     HttpServletResponse response ) throws ServletException, IOException {
 
@@ -47,16 +55,21 @@ public class Servlet extends HttpServlet {
 
       PreparedRequest request = new PreparedRequest( httpRequest );
       
-      FilePath route = request.getRoute();
-      
-      // remove the leading 'wikipower'
-      route = route.removeFirst();
-      
-      if( route.toString().equals( "debug" ) ) {
-        debug( request, response );
+      String uri = request.getRoute().toString();
+      if( uri.equals( baseURI ) ) {
+        uri = "";
       }
-      else if( route.size() > 0 && route.getElement( 0 ).equals( "wiki" ) ) {
-        route = route.removeFirst();
+      else if( uri.startsWith( baseURI + "/" ) ) {
+        uri = Strings.after( uri, baseURI + "/" );
+      }
+      
+      FilePath route = FilePath.parse( uri );
+      
+//      if( route.toString().equals( "debug" ) ) {
+//        debug( request, response );
+//      }
+//      else if( route.size() > 0 && route.getElement( 0 ).equals( "wiki" ) ) {
+//        route = route.removeFirst();
         RouteInfo info = storage.getInfo( route );
         if( !info.exists() ) {
           notFoundPage( response, route );
@@ -68,10 +81,10 @@ public class Servlet extends HttpServlet {
         else {
           showListing( response, route );
         }
-      }
-      else {
-        response.sendRedirect( "static" );
-      }
+//      }
+//      else {
+//        response.sendRedirect( "static" );
+//      }
 
     }
     catch( URISyntaxException ex ) {
@@ -102,14 +115,14 @@ public class Servlet extends HttpServlet {
     writer.println( "<h2>Pages</h2>" );
     writer.println( "<div>" );
     for( FilePath subFilePath : storage.listPages( route ) ) {
-      writer.println( "<a href=\"" + subFilePath + "\">" + subFilePath.getLast() + "</a><br>" );
+      writer.println( "<a href=\"" + baseURI + "/" + subFilePath + "\">" + subFilePath.getLast() + "</a><br>" );
     }
     writer.println( "</div>" );
     
     writer.println( "<h2>Folders</h2>" );
     writer.println( "<div>" );
     for( FilePath subFilePath : storage.listFolders( route ) ) {
-      writer.println( "<a href=\"" + subFilePath + "\">" + subFilePath.getLast() + "/</a><br>" );
+      writer.println( "<a href=\"" + baseURI + "/" + subFilePath + "\">" + subFilePath.getLast() + "/</a><br>" );
     }
     writer.println( "</div>" );
 
@@ -120,7 +133,7 @@ public class Servlet extends HttpServlet {
 
 
   private void navigation( PrintWriter writer ) throws IOException {
-    writer.println( "<a href=\"/wikipower\">Home</a><hr>" );
+    writer.println( "<a href=\""+ baseURI +"\">Home</a><hr>" );
   }
 
 
@@ -158,7 +171,7 @@ public class Servlet extends HttpServlet {
     PrintWriter writer = response.getWriter();
     head( writer );
     navigation( writer );
-    page.toHtml( writer );
+    renderer.render( page, writer );
     foot( writer );
     writer.close();
 
@@ -257,6 +270,19 @@ public class Servlet extends HttpServlet {
     
     String wikiDataURL = config.getInitParameter( "wikiDataURL" );
     String defaultExtension = config.getInitParameter( "defaultExtension" );
+    baseURI = config.getInitParameter( "baseURI" );
+    String useCache = config.getInitParameter( "useCache" );
+    RenderConfig renderConfig = new RenderConfig();
+    //renderConfig.setBaseURL( baseURI );
+    
+    if( !Strings.isEmpty( baseURI ) ) {
+      if( baseURI.endsWith( "/" ) ) {
+        baseURI = Strings.before( baseURI, "/" );
+      }
+    }
+    
+    renderConfig.setUseCache( useCache == null ? true : Boolean.valueOf( useCache ) );
+    renderer = new Renderer( renderConfig );
     if( !Strings.isEmpty( wikiDataURL ) ) {
       try {
         storage = StorageLocator.locateStorage( wikiDataURL, defaultExtension );

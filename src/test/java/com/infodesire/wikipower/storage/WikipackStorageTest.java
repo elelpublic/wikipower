@@ -10,7 +10,10 @@ import static org.junit.Assert.assertTrue;
 import com.infodesire.bsmcommons.file.FilePath;
 import com.infodesire.bsmcommons.io.Bytes;
 import com.infodesire.bsmcommons.io.Charsets;
+import com.infodesire.bsmcommons.io.PrintStringWriter;
 import com.infodesire.wikipower.wiki.Page;
+import com.infodesire.wikipower.wiki.RenderConfig;
+import com.infodesire.wikipower.wiki.Renderer;
 import com.infodesire.wikipower.wiki.RouteInfo;
 
 import java.io.ByteArrayInputStream;
@@ -19,8 +22,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -33,8 +34,12 @@ import org.junit.Test;
 public class WikipackStorageTest {
 
 
+  private Renderer renderer;
+
   @Before
   public void setUp() throws Exception {
+    RenderConfig config = new RenderConfig();
+    renderer = new Renderer( config );
   }
 
 
@@ -69,13 +74,13 @@ public class WikipackStorageTest {
     assertFalse( s.getInfo( sub ).isPage() );
     
     Page main = s.getPage( new FilePath( root, "main" ) );
-    StringWriter content = new StringWriter();
-    main.toHtml( new PrintWriter( content ) );
+    PrintStringWriter content = new PrintStringWriter();
+    renderer.render( main, content );
     assertTrue( containsHtml( "main", content.toString() ) );
     
     Page sub1 = s.getPage( new FilePath( sub, "sub1" ) );
-    content = new StringWriter();
-    sub1.toHtml( new PrintWriter( content ) );
+    content = new PrintStringWriter();
+    renderer.render( sub1, content );
     assertTrue( containsHtml( "sub1", content.toString() ) );
     
     List<FilePath> pages = s.listPages( root );

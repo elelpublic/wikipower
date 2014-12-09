@@ -9,14 +9,16 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.io.Files;
 import com.infodesire.bsmcommons.file.FilePath;
+import com.infodesire.bsmcommons.io.PrintStringWriter;
 import com.infodesire.wikipower.wiki.Page;
+import com.infodesire.wikipower.wiki.RenderConfig;
+import com.infodesire.wikipower.wiki.Renderer;
 import com.infodesire.wikipower.wiki.RouteInfo;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Collection;
 
 import org.codehaus.plexus.util.FileUtils;
@@ -29,10 +31,13 @@ public class FileStorageTest {
 
 
   private File tempDir;
+  private Renderer renderer;
 
   @Before
   public void setUp() throws Exception {
     tempDir = Files.createTempDir();
+    RenderConfig config = new RenderConfig();
+    renderer = new Renderer( config );
   }
 
 
@@ -63,13 +68,13 @@ public class FileStorageTest {
     assertFalse( s.getInfo( sub ).isPage() );
     
     Page main = s.getPage( new FilePath( root, "main" ) );
-    StringWriter content = new StringWriter();
-    main.toHtml( new PrintWriter( content ) );
+    PrintStringWriter content = new PrintStringWriter();
+    renderer.render( main, content );
     assertTrue( containsHtml( "main", content.toString() ) );
     
     Page sub1 = s.getPage( new FilePath( sub, "sub1" ) );
-    content = new StringWriter();
-    sub1.toHtml( new PrintWriter( content ) );
+    content = new PrintStringWriter();
+    renderer.render( sub1, content );
     assertTrue( containsHtml( "sub1", content.toString() ) );
     
     Collection<FilePath> pages = s.listPages( root );
