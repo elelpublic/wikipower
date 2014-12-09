@@ -16,7 +16,7 @@ apply plugin: 'jetty'
 apply plugin: 'ivy-publish'
 
 group = 'com.infodesire'
-version = '0.0.4'
+version = '0.0.5'
 httpPort = 8081
 stopPort = 8082
 stopKey = 10
@@ -128,7 +128,7 @@ dependencies {
     	//'org.slf4j:slf4j-api:1.7.5',
     	'commons-io:commons-io:2.4',
     	'com.infodesire:wikitext-all:0.0.2',
-    	'com.infodesire:bsmcommons:0.4.2',
+    	'com.infodesire:bsmcommons:0.4.3',
     	'servletapi:servlet-api:2.4',
     	'org.eclipse.jetty:jetty-server:9.2.3.v20140905',
     	'org.eclipse.jetty:jetty-servlet:9.2.3.v20140905',
