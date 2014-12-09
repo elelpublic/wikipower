@@ -66,14 +66,18 @@ public class WikipackStorageTest {
     
     FilePath root = new FilePath( true );
     FilePath sub = new FilePath( root, "sub" );
+    FilePath mainPath = new FilePath( root, "main" );
     
     assertTrue( s.getInfo( root ).exists() );
     assertFalse( s.getInfo( root ).isPage() );
     
+    assertTrue( s.getInfo( mainPath ).exists() );
+    assertTrue( s.getInfo( mainPath ).isPage() );
+
     assertTrue( s.getInfo( sub ).exists() );
     assertFalse( s.getInfo( sub ).isPage() );
     
-    Page main = s.getPage( new FilePath( root, "main" ) );
+    Page main = s.getPage( mainPath );
     PrintStringWriter content = new PrintStringWriter();
     renderer.render( main, content );
     assertTrue( containsHtml( "main", content.toString() ) );
@@ -85,7 +89,7 @@ public class WikipackStorageTest {
     
     List<FilePath> pages = s.listPages( root );
     assertEquals( 1, pages.size() );
-    assertEquals( "main.markdown", pages.get( 0 ).toString() );
+    assertEquals( "main", pages.get( 0 ).toString() );
     assertEquals( "main", s.getPage( pages.get( 0 ) ).getWikiURL() );
     
     List<FilePath> folders = s.listFolders( root );

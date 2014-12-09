@@ -22,29 +22,22 @@ import java.util.Collection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.log4j.Logger;
-
 
 /**
  * Manage wiki pages in a file system
  *
  */
-public class FileStorage implements Storage {
+public class FileStorage extends BaseStorage {
   
   
-  private static Logger logger = Logger.getLogger( FileStorage.class );
-
-
   private File baseDir;
-
-
-  private String defaultExtension;
 
 
   public FileStorage( File baseDir, String defaultExtension  ) {
     
+    super( defaultExtension );
+    
     this.baseDir = baseDir;
-    this.defaultExtension = defaultExtension;
     
     if( !baseDir.exists() ) {
       init();
@@ -90,14 +83,16 @@ public class FileStorage implements Storage {
   @Override
   public Page getPage( FilePath route ) throws StorageException {
     
-    if( !Strings.isEmpty( defaultExtension )
-      && route.getLast().indexOf( '.' ) == -1 ) {
-      route = new FilePath( route.getParent(), route.getLast() + '.'
-        + defaultExtension );
-    }
-
     String name = route.toString();
     File file = new File( baseDir, name );
+    
+    if( !file.exists() ) {
+      FilePath alternativePath = getPathWithExtension( route );
+      if( alternativePath != null ) {
+        return getPage( alternativePath );
+      }
+    }
+    
     String extension = Files.getFileExtension( name );
     Language language = Language.getLanguageForExtension( extension );
     String wikiURL = Strings.beforeLast( name, "." + extension );
@@ -153,7 +148,13 @@ public class FileStorage implements Storage {
     String name = route.toString();
     
     if( !file.exists() ) {
-      return new RouteInfo( name, false, false );
+      FilePath alternative = getPathWithExtension( route );
+      if( alternative != null ) {
+        return getInfo( alternative );
+      }
+      else {
+        return new RouteInfo( name, false, false );
+      }
     }
     else {
       if( file.isDirectory() ) {

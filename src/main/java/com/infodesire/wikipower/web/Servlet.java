@@ -65,26 +65,36 @@ public class Servlet extends HttpServlet {
       
       FilePath route = FilePath.parse( uri );
       
-//      if( route.toString().equals( "debug" ) ) {
-//        debug( request, response );
-//      }
-//      else if( route.size() > 0 && route.getElement( 0 ).equals( "wiki" ) ) {
-//        route = route.removeFirst();
-        RouteInfo info = storage.getInfo( route );
-        if( !info.exists() ) {
-          notFoundPage( response, route );
-        }
-        else if( info.isPage() ) {
-          Page page = storage.getPage( route );
-          showPage( response, page );
+      if( route.isBase() ) {
+        FilePath indexRoute = FilePath.parse( "index" );
+        RouteInfo indexInfo = storage.getInfo( indexRoute );
+        if( indexInfo.exists() && indexInfo.isPage() ) {
+          Page indexPage = storage.getPage( indexRoute );
+          showPage( response, indexPage );
         }
         else {
           showListing( response, route );
         }
-//      }
-//      else {
-//        response.sendRedirect( "static" );
-//      }
+      }
+      
+      RouteInfo info = storage.getInfo( route );
+      if( !info.exists() ) {
+        
+        if( route.toString().equals( ".debug" ) ) {
+          debug( request, response );
+        }
+        else {
+          notFoundPage( response, route );
+        }
+        
+      }
+      else if( info.isPage() ) {
+        Page page = storage.getPage( route );
+        showPage( response, page );
+      }
+      else {
+        showListing( response, route );
+      }
 
     }
     catch( URISyntaxException ex ) {

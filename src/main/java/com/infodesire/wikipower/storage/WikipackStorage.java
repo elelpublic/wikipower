@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -26,30 +27,31 @@ import java.util.zip.ZipFile;
  * Storage based on a *.wikipack file. 
  *
  */
-public class WikipackStorage implements Storage {
+public class WikipackStorage extends BaseStorage {
   
   
   private ZipFile zipFile;
   private ZipIndex zipIndex;
-  private String defaultExtension;
 
   public WikipackStorage( File wikipackFile, String defaultExtension ) throws ZipException, IOException {
+    super( defaultExtension );
     zipFile = new ZipFile( wikipackFile );
     zipIndex = new ZipIndex( wikipackFile, true /* implicit folders */, true /* relativePaths */ );
-    this.defaultExtension = defaultExtension;
   }
 
   @Override
   public Page getPage( FilePath route ) throws StorageException {
     try {
-      if( !Strings.isEmpty( defaultExtension )
-        && route.getLast().indexOf( '.' ) == -1 ) {
-        route = new FilePath( route.getParent(), route.getLast() + '.'
-          + defaultExtension );
-      }
       ZipEntry entry = zipFile.getEntry( route.toString() );
+
       if( entry == null ) {
-        return null;
+        FilePath alternativePath = getPathWithExtension( route );
+        if( alternativePath != null ) {
+          return getPage( alternativePath );
+        }
+        else {
+          return null;
+        }
       }
       InputStream in = zipFile.getInputStream( entry );
       String extension = Files.getFileExtension( entry.getName() );
@@ -68,7 +70,21 @@ public class WikipackStorage implements Storage {
 
   @Override
   public List<FilePath> listPages( FilePath dir ) {
-    return zipIndex.listFiles( dir );
+    if( Strings.isEmpty( defaultExtension ) ) {
+      return zipIndex.listFiles( dir );
+    }
+    else {
+      String cutAway = "." + defaultExtension;
+      List<FilePath> result = new ArrayList<FilePath>();
+      for( FilePath filePath : zipIndex.listFiles( dir ) ) {
+        if( filePath.getLast().endsWith( cutAway ) ) {
+          filePath = new FilePath( filePath.getParent(), Strings.before(
+            filePath.getLast(), cutAway ) );
+        }
+        result.add( filePath );
+      }
+      return result;
+    }
   }
 
   @Override
@@ -84,6 +100,14 @@ public class WikipackStorage implements Storage {
     }
     String path = route.toString();
     boolean exists = zipIndex.exists( path );
+    
+    if( !exists ) {
+      FilePath alternativePath = getPathWithExtension( route );
+      if( alternativePath != null ) {
+        return getInfo( alternativePath );
+      }
+    }
+    
     boolean isPage = false;
     if( exists ) {
       isPage = zipIndex.isFile( path );

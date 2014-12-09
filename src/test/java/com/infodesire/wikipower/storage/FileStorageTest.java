@@ -60,14 +60,20 @@ public class FileStorageTest {
     
     FilePath root = new FilePath( true );
     FilePath sub = new FilePath( root, "sub" );
+    FilePath mainPath = new FilePath( root, "main" );
     
     assertTrue( s.getInfo( root ).exists() );
     assertFalse( s.getInfo( root ).isPage() );
+
+    assertTrue( s.getInfo( mainPath ).exists() );
+    assertTrue( s.getInfo( mainPath ).isPage() );
+
+    assertTrue( s.getInfo( root ).exists() );
     
     assertTrue( s.getInfo( sub ).exists() );
     assertFalse( s.getInfo( sub ).isPage() );
     
-    Page main = s.getPage( new FilePath( root, "main" ) );
+    Page main = s.getPage( mainPath );
     PrintStringWriter content = new PrintStringWriter();
     renderer.render( main, content );
     assertTrue( containsHtml( "main", content.toString() ) );
