@@ -55,6 +55,10 @@ public class Servlet extends HttpServlet {
 
       PreparedRequest request = new PreparedRequest( httpRequest );
       
+      if( httpRequest.getRequestURI().equals( baseURI ) ) {
+        response.sendRedirect( baseURI + "/" ); 
+      }
+      
       String uri = request.getRoute().toString();
       if( uri.equals( baseURI ) ) {
         uri = "";
@@ -70,7 +74,7 @@ public class Servlet extends HttpServlet {
         RouteInfo indexInfo = storage.getInfo( indexRoute );
         if( indexInfo.exists() && indexInfo.isPage() ) {
           Page indexPage = storage.getPage( indexRoute );
-          showPage( response, indexPage );
+          showPage( response, indexPage, indexRoute );
         }
         else {
           showListing( response, route );
@@ -93,7 +97,7 @@ public class Servlet extends HttpServlet {
       }
       else if( info.isPage() ) {
         Page page = storage.getPage( route );
-        showPage( response, page );
+        showPage( response, page, route );
       }
       else {
         showListing( response, route );
@@ -121,7 +125,11 @@ public class Servlet extends HttpServlet {
     PrintWriter writer = response.getWriter();
     
     head( writer );
-    navigation( writer );
+    String upURL = null;
+    if( route.getParent() != null ) {
+      upURL = route.getParent().toString();
+    }
+    navigation( writer, upURL );
     
     writer.println( "<h1>Listing of " + route + "</h1>" );
 
@@ -145,10 +153,15 @@ public class Servlet extends HttpServlet {
   }
 
 
-  private void navigation( PrintWriter writer ) throws IOException {
+  private void navigation( PrintWriter writer, String upURI ) throws IOException {
     writer.println( "<a href=\""+ baseURI +"\">Home</a> " );
     writer.println( " &nbsp; " );
-    writer.println( " <a href=\""+ baseURI +"/.index\">Index</a> <hr>" );
+    writer.println( " <a href=\""+ baseURI +"/.index\">Index</a> " );
+    if( upURI != null ) {
+      writer.println( " &nbsp; " );
+      writer.println( " <a href=\""+ baseURI + "/" + upURI + "\">Up</a> " );
+    }
+    writer.println( " <hr>" );
   }
 
 
@@ -160,7 +173,7 @@ public class Servlet extends HttpServlet {
     PrintWriter writer = response.getWriter();
     
     head( writer );
-    navigation( writer );
+    navigation( writer, null );
     
     writer.println( "<h1>Debug the HTTP request</h1>" );
     writer.println( "<div>" );
@@ -177,7 +190,7 @@ public class Servlet extends HttpServlet {
   }
 
 
-  private void showPage( HttpServletResponse response, Page page )
+  private void showPage( HttpServletResponse response, Page page, FilePath path  )
     throws IOException, InstantiationException, IllegalAccessException {
 
     response.setContentType( "text/html;charset=utf-8" );
@@ -185,7 +198,11 @@ public class Servlet extends HttpServlet {
 
     PrintWriter writer = response.getWriter();
     head( writer );
-    navigation( writer );
+    String upURL = null;
+    if( path.getParent() != null ) {
+      upURL = path.getParent().toString();
+    }
+    navigation( writer, upURL );
     renderer.render( page, writer );
     foot( writer );
     writer.close();
@@ -213,7 +230,7 @@ public class Servlet extends HttpServlet {
 
     PrintWriter writer = response.getWriter();
     
-    navigation( writer );
+    navigation( writer, null );
     
     writer.println( "<h1>No such page</h1>" );
     writer.println( "<div>" );
@@ -262,7 +279,7 @@ public class Servlet extends HttpServlet {
 
       PrintWriter writer = response.getWriter();
       
-      navigation( writer );
+      navigation( writer, null );
 
       writer.println( "<h1>Internal Server Error</h1>" );
       writer.println( "<div>" );
