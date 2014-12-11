@@ -6,6 +6,7 @@ package com.infodesire.wikipower.web;
 import com.google.common.base.Throwables;
 import com.infodesire.bsmcommons.Strings;
 import com.infodesire.bsmcommons.file.FilePath;
+import com.infodesire.bsmcommons.io.Bytes;
 import com.infodesire.wikipower.storage.Storage;
 import com.infodesire.wikipower.storage.StorageException;
 import com.infodesire.wikipower.storage.StorageLocator;
@@ -15,11 +16,13 @@ import com.infodesire.wikipower.wiki.Renderer;
 import com.infodesire.wikipower.wiki.RouteInfo;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -68,6 +71,15 @@ public class Servlet extends HttpServlet {
       }
       
       FilePath route = FilePath.parse( uri );
+      
+      if( !route.isBase() && route.getElement( 0 ).equals( "static" ) ) {
+        InputStream in = Servlet.class.getResourceAsStream( "/webapp/" + route );
+        ServletOutputStream out = response.getOutputStream();
+        Bytes.pipe( in, out );
+        in.close();
+        out.close();
+        return;
+      }
       
       if( route.isBase() ) {
         FilePath indexRoute = FilePath.parse( "index" );
@@ -154,6 +166,7 @@ public class Servlet extends HttpServlet {
 
 
   private void navigation( PrintWriter writer, String upURI ) throws IOException {
+    writer.println( "<div class=\"wikipower-navigation\"> " );
     writer.println( "<a href=\""+ baseURI +"\">Home</a> " );
     writer.println( " &nbsp; " );
     writer.println( " <a href=\""+ baseURI +"/.index\">Index</a> " );
@@ -161,7 +174,7 @@ public class Servlet extends HttpServlet {
       writer.println( " &nbsp; " );
       writer.println( " <a href=\""+ baseURI + "/" + upURI + "\">Up</a> " );
     }
-    writer.println( " <hr>" );
+    writer.println( "</div>" );
   }
 
 
@@ -212,13 +225,16 @@ public class Servlet extends HttpServlet {
 
   private void head( PrintWriter writer ) {
     writer.println( "<html><head>" );
-    writer.println( "<link rel=\"icon\" type=\"image/ico\" href=\"/wikipower/favicon.ico\"/>" );
-    writer.println( "</head><body>" );
+    writer.println( "<link rel=\"icon\" type=\"image/ico\" href=\"" + baseURI
+      + "/static/images/favicon.ico\"/>" );
+    writer.println( "<link rel=\"stylesheet\" type=\"text/css\" href=\""
+      + baseURI + "/static/css/wikipower.css\"></link>" );
+    writer.println( "</head><body><div class=\"wikipower-content\">" );
   }
 
 
   private void foot( PrintWriter writer ) {
-    writer.println( "</body></html>" );
+    writer.println( "</div></body></html>" );
   }
   
   

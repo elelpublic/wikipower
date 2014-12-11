@@ -16,7 +16,7 @@ apply plugin: 'jetty'
 apply plugin: 'ivy-publish'
 
 group = 'com.infodesire'
-version = '0.0.13'
+version = '0.0.15'
 httpPort = 8081
 stopPort = 8082
 stopKey = 10
@@ -36,12 +36,24 @@ jar {
 }
 
 jar {
-	from 'build/distributions/sample-wiki.zip' 
+	from 'build/distributions/sample-wiki.zip'
+}
+
+jar {	
+	from( 'src/main/webapp' ) {
+		into 'webapp'
+	}
 }
 
 war {
 	from( 'build/distributions/sample-wiki.zip' ) {
 		into 'WEB-INF/classes'
+	}
+}
+
+war {
+	from( 'src/main/webapp' ) {
+		into 'WEB-INF/classes/webapp'
 	}
 }
 

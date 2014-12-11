@@ -78,6 +78,8 @@ public class Renderer {
         builder.setBase( baseURI );
       }
       
+      builder.setDefaultAbsoluteLinkTarget( "external" );
+      
       markupParser.setBuilder( builder );
       markupParser.parse( markupReader );
       
