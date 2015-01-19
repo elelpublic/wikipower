@@ -4,6 +4,7 @@
 package com.infodesire.wikipower.web;
 
 import com.google.common.base.Throwables;
+import com.google.common.io.Files;
 import com.infodesire.bsmcommons.Strings;
 import com.infodesire.bsmcommons.file.FilePath;
 import com.infodesire.bsmcommons.io.Bytes;
@@ -19,6 +20,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeSet;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -73,11 +78,7 @@ public class Servlet extends HttpServlet {
       FilePath route = FilePath.parse( uri );
       
       if( !route.isBase() && route.getElement( 0 ).equals( "static" ) ) {
-        InputStream in = Servlet.class.getResourceAsStream( "/webapp/" + route );
-        ServletOutputStream out = response.getOutputStream();
-        Bytes.pipe( in, out );
-        in.close();
-        out.close();
+        doStatic( route, response );
         return;
       }
       
@@ -129,6 +130,29 @@ public class Servlet extends HttpServlet {
   }
 
 
+  private static Map<String, String> contentTypes = new HashMap<String, String>();
+  
+  static {
+    contentTypes.put( "css", "text/css" );
+    contentTypes.put( "js", "text/javascript" );
+  }
+  
+  private void doStatic( FilePath route , HttpServletResponse response ) throws IOException {
+
+    String extension = Files.getFileExtension( route.getLast() );
+    String contentType = contentTypes.get( extension );
+    if( contentType != null ) {
+      response.setContentType( contentType );
+    }
+    InputStream in = Servlet.class.getResourceAsStream( "/webapp/" + route );
+    ServletOutputStream out = response.getOutputStream();
+    Bytes.pipe( in, out );
+    in.close();
+    out.close();
+    
+  }
+
+
   private void showListing( HttpServletResponse response, FilePath route ) throws IOException {
 
     response.setContentType( "text/html;charset=utf-8" );
@@ -147,17 +171,20 @@ public class Servlet extends HttpServlet {
 
     writer.println( "<h2>Pages</h2>" );
     writer.println( "<div>" );
-    for( FilePath subFilePath : storage.listPages( route ) ) {
+    for( FilePath subFilePath : new TreeSet<FilePath>( storage.listPages( route ) ) ) {
       writer.println( "<a href=\"" + baseURI + "/" + subFilePath + "\">" + subFilePath.getLast() + "</a><br>" );
     }
     writer.println( "</div>" );
     
-    writer.println( "<h2>Folders</h2>" );
-    writer.println( "<div>" );
-    for( FilePath subFilePath : storage.listFolders( route ) ) {
-      writer.println( "<a href=\"" + baseURI + "/" + subFilePath + "\">" + subFilePath.getLast() + "/</a><br>" );
+    Collection<FilePath> subFolders = storage.listFolders( route );
+    if( !subFolders.isEmpty() ) {
+      writer.println( "<h2>Folders</h2>" );
+      writer.println( "<div>" );
+      for( FilePath subFilePath : subFolders ) {
+        writer.println( "<a href=\"" + baseURI + "/" + subFilePath + "/\">" + subFilePath.getLast() + "/</a><br>" );
+      }
+      writer.println( "</div>" );
     }
-    writer.println( "</div>" );
 
     foot( writer );
     writer.close();
