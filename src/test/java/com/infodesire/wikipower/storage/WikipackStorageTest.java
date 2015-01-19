@@ -6,6 +6,7 @@ package com.infodesire.wikipower.storage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 
 import com.infodesire.bsmcommons.file.FilePath;
 import com.infodesire.bsmcommons.io.Bytes;
@@ -22,7 +23,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -59,6 +63,9 @@ public class WikipackStorageTest {
     zipFile( zipOut, "sub/sub1.markdown", "sub1" );
     zipFile( zipOut, "sub/sub2.markdown", "sub2" );
     zipFile( zipOut, "sub/sub/subsub.markdown", "subsub" );
+    zipFile( zipOut, "module/index.markdown", "index" );
+    zipFile( zipOut, "module2/readme.txt", "readme" );
+    zipFile( zipOut, "module2/index.txt", "index" );
     
     zipOut.close();
     
@@ -93,13 +100,33 @@ public class WikipackStorageTest {
     assertEquals( "main", s.getPage( pages.get( 0 ) ).getWikiURL() );
     
     List<FilePath> folders = s.listFolders( root );
-    assertEquals( 1, folders.size() );
-    assertEquals( "sub", folders.get( 0 ).toString() );
+    assertEquals( 3, folders.size() );
+    
+    Map<String, FilePath> mapped = map( folders );
+    FilePath folder = mapped.get( "sub" );
+    
+    assertEquals( "sub", folder.toString() );
     RouteInfo info = s.getInfo( root );
     assertEquals( "", info.getName() );
     assertTrue( info.exists() );
     assertFalse( info.isPage() );
     
+    folder = mapped.get( "module" );
+    assertEquals( "module", folder.toString() );
+    info = s.getInfo( folder );
+    assertEquals( "module", info.getName() );
+    assertTrue( info.exists() );
+    assertFalse( info.isPage() );
+    assertEquals( "index.markdown", info.getIndexPage() );
+    
+    folder = mapped.get( "module2" );
+    assertEquals( "module2", folder.toString() );
+    info = s.getInfo( folder );
+    assertEquals( "module2", info.getName() );
+    assertTrue( info.exists() );
+    assertFalse( info.isPage() );
+    assertNull( info.getIndexPage() );
+
   }
   
   private boolean containsHtml( String string, String content ) {
@@ -129,4 +156,16 @@ public class WikipackStorageTest {
     
   }
   
+  private Map<String, FilePath> map( Collection<FilePath> folders ) {
+    
+    Map<String, FilePath> map = new HashMap<String, FilePath>();
+    for( FilePath filePath : folders ) {
+      map.put( filePath.toString(), filePath );
+    }
+    return map;
+    
+  }
+
 }
+
+

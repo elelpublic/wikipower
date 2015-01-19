@@ -6,6 +6,7 @@ package com.infodesire.wikipower.storage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 
 import com.google.common.io.Files;
 import com.infodesire.bsmcommons.file.FilePath;
@@ -20,6 +21,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.codehaus.plexus.util.FileUtils;
 import org.junit.After;
@@ -54,6 +57,9 @@ public class FileStorageTest {
     store( "sub/sub1.markdown", "sub1" );
     store( "sub/sub2.markdown", "sub2" );
     store( "sub/sub/subsub.markdown", "subsub" );
+    store( "module/index.markdown", "index" );
+    store( "module2/readme.txt", "readme" );
+    store( "module2/index.txt", "index" );
     
     
     FileStorage s = new FileStorage( tempDir, "markdown" );
@@ -90,17 +96,48 @@ public class FileStorageTest {
     assertEquals( "main", s.getPage( page ).getWikiURL() );
     
     Collection<FilePath> folders = s.listFolders( root );
-    assertEquals( 1, folders.size() );
-    FilePath folder = folders.iterator().next();
+    assertEquals( 3, folders.size() );
+    
+    Map<String, FilePath> mapped = map( folders );
+    FilePath folder = mapped.get( "sub" );
     assertEquals( "sub", folder.toString() );
+    
     RouteInfo info = s.getInfo( root );
     assertEquals( "", info.getName() );
     assertTrue( info.exists() );
     assertFalse( info.isPage() );
+    assertNull( info.getIndexPage() );
+
+    folder = mapped.get( "module" );
+    assertEquals( "module", folder.toString() );
+    info = s.getInfo( folder );
+    assertEquals( "module", info.getName() );
+    assertTrue( info.exists() );
+    assertFalse( info.isPage() );
+    assertEquals( "index.markdown", info.getIndexPage() );
+    
+    folder = mapped.get( "module2" );
+    assertEquals( "module2", folder.toString() );
+    info = s.getInfo( folder );
+    assertEquals( "module2", info.getName() );
+    assertTrue( info.exists() );
+    assertFalse( info.isPage() );
+    assertNull( info.getIndexPage() );
     
   }
   
   
+  private Map<String, FilePath> map( Collection<FilePath> folders ) {
+    
+    Map<String, FilePath> map = new HashMap<String, FilePath>();
+    for( FilePath filePath : folders ) {
+      map.put( filePath.toString(), filePath );
+    }
+    return map;
+    
+  }
+
+
   private void store( String path, String content ) throws IOException {
   
     File file = new File( tempDir, path );
@@ -121,6 +158,8 @@ public class FileStorageTest {
     return body != -1 && found != -1 && endBody != -1 && body < found && found < endBody;
     
   }
+  
+  
 
 
 }
