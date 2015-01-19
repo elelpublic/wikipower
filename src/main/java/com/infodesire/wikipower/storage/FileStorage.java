@@ -153,31 +153,22 @@ public class FileStorage extends BaseStorage {
         return getInfo( alternative );
       }
       else {
-        return new RouteInfo( name, false, false, null );
+        return new RouteInfo( name, false, false, false );
       }
     }
     else {
       if( file.isDirectory() ) {
-        String indexExists = null;
-        for( File indexFile : file.listFiles() ) {
-          String indexFileName = indexFile.getName();
-          if( indexFileName.startsWith( "index." ) ) {
-            String extension = Files.getFileExtension( indexFileName );
-            if( Language.getLanguageForExtension( extension ) != null ) {
-              indexExists = indexFileName;
-              break;
-            }
-          }
-        }
+        File indexFile = new File( file, "index." + defaultExtension );
+        boolean indexExists = indexFile.exists() && indexFile.isFile();
         return new RouteInfo( name, true, false, indexExists );
       }
       else {
         String extension = Files.getFileExtension( name );
         if( Language.getLanguageForExtension( extension ) == null ) {
-          return new RouteInfo( name, true, false, null );
+          return new RouteInfo( name, true, false, false );
         }
         else {
-          return new RouteInfo( name, true, true, null );
+          return new RouteInfo( name, true, true, false );
         }
       }
     }

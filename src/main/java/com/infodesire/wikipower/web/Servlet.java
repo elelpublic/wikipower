@@ -100,8 +100,8 @@ public class Servlet extends HttpServlet {
         if( route.toString().equals( ".debug" ) ) {
           debug( request, response );
         }
-        else if( route.toString().equals( ".index" ) ) {
-          showListing( response, FilePath.parse( "" ) );
+        else if( route.getLast().equals( ".index" ) ) {
+          showListing( response, route.getParent() );
         }
         else {
           notFoundPage( response, route );
@@ -110,6 +110,10 @@ public class Servlet extends HttpServlet {
       }
       else if( info.isPage() ) {
         Page page = storage.getPage( route );
+        showPage( response, page, route.getParent() );
+      }
+      else if( info.hasIndexPage() ) {
+        Page page = storage.getPage( new FilePath( route, "index" ) );
         showPage( response, page, route );
       }
       else {
@@ -161,11 +165,7 @@ public class Servlet extends HttpServlet {
     PrintWriter writer = response.getWriter();
     
     head( writer );
-    String upURL = null;
-    if( route.getParent() != null ) {
-      upURL = route.getParent().toString();
-    }
-    navigation( writer, upURL );
+    navigation( writer, route );
     
     writer.println( "<h1>Listing of " + route + "</h1>" );
 
@@ -192,14 +192,28 @@ public class Servlet extends HttpServlet {
   }
 
 
-  private void navigation( PrintWriter writer, String upURI ) throws IOException {
+  private void navigation( PrintWriter writer, FilePath currentFolder )
+    throws IOException {
+
+    String upURI = null;
+    if( currentFolder != null ) {
+      if( currentFolder.getParent() != null ) {
+        upURI = currentFolder.getParent().toString();
+      }
+    }
+    
+    String indexURI = ".index";
+    if( currentFolder != null && currentFolder.toString().trim().length() > 0 ) {
+      indexURI = currentFolder.toString() + "/.index";
+    }
+
     writer.println( "<div class=\"wikipower-navigation\"> " );
-    writer.println( "<a href=\""+ baseURI +"\">Home</a> " );
+    writer.println( "<a href=\"" + baseURI + "\">Home</a> " );
     writer.println( " &nbsp; " );
-    writer.println( " <a href=\""+ baseURI +"/.index\">Index</a> " );
+    writer.println( " <a href=\"" + baseURI + "/" + indexURI + "\">Index</a> " );
     if( upURI != null ) {
       writer.println( " &nbsp; " );
-      writer.println( " <a href=\""+ baseURI + "/" + upURI + "\">Up</a> " );
+      writer.println( " <a href=\"" + baseURI + "/" + upURI + "\">Up</a> " );
     }
     writer.println( "</div>" );
   }
@@ -238,11 +252,7 @@ public class Servlet extends HttpServlet {
 
     PrintWriter writer = response.getWriter();
     head( writer );
-    String upURL = null;
-    if( path.getParent() != null ) {
-      upURL = path.getParent().toString();
-    }
-    navigation( writer, upURL );
+    navigation( writer, path );
     renderer.render( page, writer );
     foot( writer );
     writer.close();

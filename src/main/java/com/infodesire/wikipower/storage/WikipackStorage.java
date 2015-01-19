@@ -96,7 +96,7 @@ public class WikipackStorage extends BaseStorage {
   @Override
   public RouteInfo getInfo( FilePath route ) {
     if( route.isBase() ) {
-      return new RouteInfo( "", true, false, null );
+      return new RouteInfo( "", true, false, false );
     }
     String path = route.toString();
     boolean exists = zipIndex.exists( path );
@@ -109,19 +109,16 @@ public class WikipackStorage extends BaseStorage {
     }
     
     boolean isPage = false;
-    String indexExists = null;
+    boolean indexExists = false;
     if( exists ) {
       isPage = zipIndex.isFile( path );
       if( !isPage ) {
-        for( FilePath indexPath : zipIndex.listFiles( route ) ) {
-          String indexFileName = indexPath.getLast();
-          if( indexFileName.startsWith( "index." ) ) {
-            String extension = Files.getFileExtension( indexFileName );
-            if( Language.getLanguageForExtension( extension ) != null ) {
-              indexExists = indexFileName;
-              break;
-            }
-          }
+        String indexPath = new FilePath( route, "index." + defaultExtension )
+          .toString();
+        indexExists = zipIndex.exists( indexPath )
+          && zipIndex.isFile( indexPath );
+        if( !indexExists ) {
+          
         }
       }
     }

@@ -13,13 +13,13 @@ public class RouteInfo {
   private boolean exists;
   private boolean isPage;
   private String name;
-  private String indexPage;
+  private boolean hasIndexPage;
   
-  public RouteInfo( String name, boolean exists, boolean isPage, String indexPage ) {
+  public RouteInfo( String name, boolean exists, boolean isPage, boolean hasIndexPage ) {
     this.name = name;
     this.exists = exists;
     this.isPage = isPage;
-    this.indexPage = indexPage;
+    this.hasIndexPage = hasIndexPage;
   }
 
   /**
@@ -49,11 +49,10 @@ public class RouteInfo {
   
   
   /**
-   * @return If the route points to a folder and an index page exists, 
-   *  this is the name of the first valid index page
+   * @return If the route points to a folder and an index page exists
    */
-  public String getIndexPage() {
-    return indexPage;
+  public boolean hasIndexPage() {
+    return hasIndexPage;
   }
   
   
@@ -63,7 +62,7 @@ public class RouteInfo {
     }
     else {
       return "'" + name + "' " + ( isPage ? "is a page" : "is a folder" )
-        + ( indexPage == null ? "" : " (" + indexPage + ")" );
+        + ( hasIndexPage ? " (has index page)" : "" );
     }
   }
 

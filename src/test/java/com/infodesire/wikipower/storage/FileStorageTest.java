@@ -106,7 +106,7 @@ public class FileStorageTest {
     assertEquals( "", info.getName() );
     assertTrue( info.exists() );
     assertFalse( info.isPage() );
-    assertNull( info.getIndexPage() );
+    assertFalse( info.hasIndexPage() );
 
     folder = mapped.get( "module" );
     assertEquals( "module", folder.toString() );
@@ -114,7 +114,7 @@ public class FileStorageTest {
     assertEquals( "module", info.getName() );
     assertTrue( info.exists() );
     assertFalse( info.isPage() );
-    assertEquals( "index.markdown", info.getIndexPage() );
+    assertTrue( info.hasIndexPage() );
     
     folder = mapped.get( "module2" );
     assertEquals( "module2", folder.toString() );
@@ -122,7 +122,7 @@ public class FileStorageTest {
     assertEquals( "module2", info.getName() );
     assertTrue( info.exists() );
     assertFalse( info.isPage() );
-    assertNull( info.getIndexPage() );
+    assertFalse( info.hasIndexPage() );
     
   }
   

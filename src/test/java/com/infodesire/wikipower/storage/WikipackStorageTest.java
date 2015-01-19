@@ -117,7 +117,7 @@ public class WikipackStorageTest {
     assertEquals( "module", info.getName() );
     assertTrue( info.exists() );
     assertFalse( info.isPage() );
-    assertEquals( "index.markdown", info.getIndexPage() );
+    assertTrue( info.hasIndexPage() );
     
     folder = mapped.get( "module2" );
     assertEquals( "module2", folder.toString() );
@@ -125,7 +125,7 @@ public class WikipackStorageTest {
     assertEquals( "module2", info.getName() );
     assertTrue( info.exists() );
     assertFalse( info.isPage() );
-    assertNull( info.getIndexPage() );
+    assertFalse( info.hasIndexPage() );
 
   }
   
