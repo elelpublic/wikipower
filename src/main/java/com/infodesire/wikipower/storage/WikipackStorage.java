@@ -59,7 +59,7 @@ public class WikipackStorage extends BaseStorage {
       if( language == null ) {
         return null;
       }
-      String name = route.getLast();
+      String name = route.toString();
       name = Strings.beforeLast( name, "." + extension );
       return new Page( name, new InputStreamMarkupSource( in ), language );
     }
@@ -96,7 +96,7 @@ public class WikipackStorage extends BaseStorage {
   @Override
   public RouteInfo getInfo( FilePath route ) {
     if( route.isBase() ) {
-      return new RouteInfo( "", true, false, false );
+      return new RouteInfo( "", null, true, false, testForIndex( route ) );
     }
     String path = route.toString();
     boolean exists = zipIndex.exists( path );
@@ -113,16 +113,11 @@ public class WikipackStorage extends BaseStorage {
     if( exists ) {
       isPage = zipIndex.isFile( path );
       if( !isPage ) {
-        String indexPath = new FilePath( route, "index." + defaultExtension )
-          .toString();
-        indexExists = zipIndex.exists( indexPath )
-          && zipIndex.isFile( indexPath );
-        if( !indexExists ) {
-          
-        }
+        indexExists = testForIndex( route );
       }
     }
-    return new RouteInfo( path, exists, isPage, indexExists );
+    String normalized = Files.getNameWithoutExtension( route.getLast() );
+    return new RouteInfo( path, normalized, exists, isPage, indexExists );
 //    ZipEntry entry = zipFile.getEntry( path );
 //    if( entry == null ) {
 //      // check for dirs, which are not there themselves but as parents of files
@@ -142,6 +137,14 @@ public class WikipackStorage extends BaseStorage {
 //    return new RouteInfo( name, exists, !isDir );
   }
   
+  private boolean testForIndex( FilePath route ) {
+
+    String indexPath = new FilePath( route, "index." + defaultExtension )
+      .toString();
+    return zipIndex.exists( indexPath ) && zipIndex.isFile( indexPath );
+
+  }
+
   protected void finalize() {
     try {
       zipFile.close();

@@ -6,7 +6,6 @@ package com.infodesire.wikipower.storage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNull;
 
 import com.infodesire.bsmcommons.file.FilePath;
 import com.infodesire.bsmcommons.io.Bytes;
@@ -55,10 +54,13 @@ public class WikipackStorageTest {
   @Test
   public void test() throws IOException, InstantiationException, IllegalAccessException {
     
+    Page p;
+    
     File tmpFile = File.createTempFile( "WikipackStorageTest", ".wikipack" );
     OutputStream outputStream = new FileOutputStream( tmpFile );
     ZipOutputStream zipOut = new ZipOutputStream( outputStream );
     zipFile( zipOut, "main.markdown", "main" );
+    zipFile( zipOut, "index.markdown", "index" );
     zipDir( zipOut, "sub" );
     zipFile( zipOut, "sub/sub1.markdown", "sub1" );
     zipFile( zipOut, "sub/sub2.markdown", "sub2" );
@@ -95,9 +97,16 @@ public class WikipackStorageTest {
     assertTrue( containsHtml( "sub1", content.toString() ) );
     
     List<FilePath> pages = s.listPages( root );
-    assertEquals( 1, pages.size() );
-    assertEquals( "main", pages.get( 0 ).toString() );
-    assertEquals( "main", s.getPage( pages.get( 0 ) ).getWikiURL() );
+    assertEquals( 2, pages.size() );
+    p = s.getPage( FilePath.parse( "main" ) );
+    assertEquals( "main", p.getWikiURL() );
+    p = s.getPage( FilePath.parse( "index" ) );
+    assertEquals( "index", p.getWikiURL() );
+    
+    RouteInfo info = s.getInfo( FilePath.parse( "" ) );
+    assertEquals( "", info.getName() );
+    assertFalse( info.isPage() );
+    assertTrue( info.hasIndexPage() );
     
     List<FilePath> folders = s.listFolders( root );
     assertEquals( 3, folders.size() );
@@ -106,7 +115,7 @@ public class WikipackStorageTest {
     FilePath folder = mapped.get( "sub" );
     
     assertEquals( "sub", folder.toString() );
-    RouteInfo info = s.getInfo( root );
+    info = s.getInfo( root );
     assertEquals( "", info.getName() );
     assertTrue( info.exists() );
     assertFalse( info.isPage() );
@@ -126,6 +135,14 @@ public class WikipackStorageTest {
     assertTrue( info.exists() );
     assertFalse( info.isPage() );
     assertFalse( info.hasIndexPage() );
+
+    p = s.getPage( FilePath.parse( "sub/sub2" ) );
+    assertEquals( "sub/sub2", p.getWikiURL() );
+    
+    assertEquals( "sub2", s.getInfo( FilePath.parse( "sub/sub2.markdown" ) )
+      .getNormalizedName() );
+    assertEquals( "sub2", s.getInfo( FilePath.parse( "sub/sub2" ) )
+      .getNormalizedName() );
 
   }
   

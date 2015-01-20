@@ -6,7 +6,6 @@ package com.infodesire.wikipower.storage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNull;
 
 import com.google.common.io.Files;
 import com.infodesire.bsmcommons.file.FilePath;
@@ -54,6 +53,7 @@ public class FileStorageTest {
   public void test() throws IOException, InstantiationException, IllegalAccessException {
     
     store( "main.markdown", "main" );
+    store( "index.markdown", "index" );
     store( "sub/sub1.markdown", "sub1" );
     store( "sub/sub2.markdown", "sub2" );
     store( "sub/sub/subsub.markdown", "subsub" );
@@ -90,10 +90,12 @@ public class FileStorageTest {
     assertTrue( containsHtml( "sub1", content.toString() ) );
     
     Collection<FilePath> pages = s.listPages( root );
-    assertEquals( 1, pages.size() );
-    FilePath page = pages.iterator().next();
-    assertEquals( "main.markdown", page.toString() );
-    assertEquals( "main", s.getPage( page ).getWikiURL() );
+    assertEquals( 2, pages.size() );
+    Page p = s.getPage( FilePath.parse( "main" ) );
+    assertEquals( "main", p.getWikiURL() );
+    
+    p = s.getPage( FilePath.parse( "index" ) );
+    assertEquals( "index", p.getWikiURL() );
     
     Collection<FilePath> folders = s.listFolders( root );
     assertEquals( 3, folders.size() );
@@ -106,7 +108,7 @@ public class FileStorageTest {
     assertEquals( "", info.getName() );
     assertTrue( info.exists() );
     assertFalse( info.isPage() );
-    assertFalse( info.hasIndexPage() );
+    assertTrue( info.hasIndexPage() );
 
     folder = mapped.get( "module" );
     assertEquals( "module", folder.toString() );
@@ -123,6 +125,24 @@ public class FileStorageTest {
     assertTrue( info.exists() );
     assertFalse( info.isPage() );
     assertFalse( info.hasIndexPage() );
+    
+    info = s.getInfo( FilePath.parse( "" ) );
+    assertEquals( "", info.getName() );
+    assertFalse( info.isPage() );
+    assertTrue( info.hasIndexPage() );
+    
+    info = s.getInfo( FilePath.parse( "sub" ) );
+    assertEquals( "sub", info.getName() );
+    assertFalse( info.isPage() );
+    assertFalse( info.hasIndexPage() );
+    
+    p = s.getPage( FilePath.parse( "sub/sub2" ) );
+    assertEquals( "sub/sub2", p.getWikiURL() );
+    
+    assertEquals( "sub2", s.getInfo( FilePath.parse( "sub/sub2.markdown" ) )
+      .getNormalizedName() );
+    assertEquals( "sub2", s.getInfo( FilePath.parse( "sub/sub2" ) )
+      .getNormalizedName() );
     
   }
   

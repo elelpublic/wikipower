@@ -14,13 +14,28 @@ public class RouteInfo {
   private boolean isPage;
   private String name;
   private boolean hasIndexPage;
+  private String normalizedName;
   
-  public RouteInfo( String name, boolean exists, boolean isPage, boolean hasIndexPage ) {
+
+  /**
+   * Create route info
+   * 
+   * @param name Name of route (full path)
+   * @param normalizedName Name of page without file extension
+   * @param exists Route exists
+   * @param isPage This is a page (not a folder)
+   * @param hasIndexPage Folder has an index page
+   * 
+   */
+  public RouteInfo( String name, String normalizedName, boolean exists,
+    boolean isPage, boolean hasIndexPage ) {
     this.name = name;
+    this.normalizedName = normalizedName;
     this.exists = exists;
     this.isPage = isPage;
     this.hasIndexPage = hasIndexPage;
   }
+
 
   /**
    * @return Name of route
@@ -64,6 +79,15 @@ public class RouteInfo {
       return "'" + name + "' " + ( isPage ? "is a page" : "is a folder" )
         + ( hasIndexPage ? " (has index page)" : "" );
     }
+  }
+
+  
+  /**
+   * @return Name of page without file extension
+   * 
+   */
+  public String getNormalizedName() {
+    return normalizedName;
   }
 
 }

@@ -82,18 +82,6 @@ public class Servlet extends HttpServlet {
         return;
       }
       
-      if( route.isBase() ) {
-        FilePath indexRoute = FilePath.parse( "index" );
-        RouteInfo indexInfo = storage.getInfo( indexRoute );
-        if( indexInfo.exists() && indexInfo.isPage() ) {
-          Page indexPage = storage.getPage( indexRoute );
-          showPage( response, indexPage, indexRoute );
-        }
-        else {
-          showListing( response, route );
-        }
-      }
-      
       RouteInfo info = storage.getInfo( route );
       if( !info.exists() ) {
         
@@ -108,16 +96,27 @@ public class Servlet extends HttpServlet {
         }
         
       }
-      else if( info.isPage() ) {
-        Page page = storage.getPage( route );
-        showPage( response, page, route.getParent() );
-      }
-      else if( info.hasIndexPage() ) {
-        Page page = storage.getPage( new FilePath( route, "index" ) );
-        showPage( response, page, route );
-      }
-      else {
-        showListing( response, route );
+      else { // exists
+        
+        if( info.isPage() ) {
+          String normalized = info.getNormalizedName();
+          if( normalized != null && !normalized.equals( route.getLast() ) ) {
+            // this will redirect page.markdown to page
+            redirect( response, route.getParent().toString(), normalized );
+          }
+          else {
+            Page page = storage.getPage( route );
+            showPage( response, page, route );
+          }
+        }
+        else { // folder
+          if( info.hasIndexPage() ) {
+            redirect( response, uri, "index" );
+          }
+          else {
+            redirect( response, uri, ".index" ); // generated index
+          }
+        }
       }
 
     }
@@ -131,6 +130,17 @@ public class Servlet extends HttpServlet {
       errorPage( ex, httpRequest, response );
     }
 
+  }
+
+
+  private void redirect( HttpServletResponse response, String uri,
+    String pageName ) throws IOException {
+    String redirect = baseURI;
+    if( !Strings.isEmpty( baseURI ) ) {
+      redirect += "/" + uri;
+    }
+    redirect += ( redirect.endsWith( "/" ) ? "" : "/" ) + pageName;
+    response.sendRedirect( redirect );
   }
 
 
@@ -165,7 +175,7 @@ public class Servlet extends HttpServlet {
     PrintWriter writer = response.getWriter();
     
     head( writer );
-    navigation( writer, route );
+    navigation( writer, new FilePath( route, ".index" ), route.getParent() );
     
     writer.println( "<h1>Listing of " + route + "</h1>" );
 
@@ -192,28 +202,20 @@ public class Servlet extends HttpServlet {
   }
 
 
-  private void navigation( PrintWriter writer, FilePath currentFolder )
+  private void navigation( PrintWriter writer, FilePath index, FilePath up )
     throws IOException {
-
-    String upURI = null;
-    if( currentFolder != null ) {
-      if( currentFolder.getParent() != null ) {
-        upURI = currentFolder.getParent().toString();
-      }
-    }
-    
-    String indexURI = ".index";
-    if( currentFolder != null && currentFolder.toString().trim().length() > 0 ) {
-      indexURI = currentFolder.toString() + "/.index";
-    }
 
     writer.println( "<div class=\"wikipower-navigation\"> " );
     writer.println( "<a href=\"" + baseURI + "\">Home</a> " );
     writer.println( " &nbsp; " );
-    writer.println( " <a href=\"" + baseURI + "/" + indexURI + "\">Index</a> " );
-    if( upURI != null ) {
+    if( index != null ) {
+      writer.println( " <a href=\"" + baseURI + "/" + index.toString()
+        + "\">Index</a> " );
+    }
+    if( up != null ) {
       writer.println( " &nbsp; " );
-      writer.println( " <a href=\"" + baseURI + "/" + upURI + "\">Up</a> " );
+      writer.println( " <a href=\"" + baseURI + "/" + up.toString()
+        + "\">Up</a> " );
     }
     writer.println( "</div>" );
   }
@@ -227,7 +229,7 @@ public class Servlet extends HttpServlet {
     PrintWriter writer = response.getWriter();
     
     head( writer );
-    navigation( writer, null );
+    navigation( writer, null, null );
     
     writer.println( "<h1>Debug the HTTP request</h1>" );
     writer.println( "<div>" );
@@ -252,7 +254,25 @@ public class Servlet extends HttpServlet {
 
     PrintWriter writer = response.getWriter();
     head( writer );
-    navigation( writer, path );
+    
+    FilePath index = null;
+    FilePath up = null;
+    
+    if( path != null ) {
+      if( path.getParent() == null ) {
+        index = new FilePath( path, ".index" );
+        up = path;
+      }
+      else {
+        index = new FilePath( path.getParent(), ".index" );
+        up = path.getParent();
+      }
+      if( path.getLast().equals( "index" ) ) {
+        up = up.getParent();
+      }
+    }
+    
+    navigation( writer, index, up );
     renderer.render( page, writer );
     foot( writer );
     writer.close();
@@ -283,7 +303,7 @@ public class Servlet extends HttpServlet {
 
     PrintWriter writer = response.getWriter();
     
-    navigation( writer, null );
+    navigation( writer, null, null );
     
     writer.println( "<h1>No such page</h1>" );
     writer.println( "<div>" );
@@ -332,7 +352,7 @@ public class Servlet extends HttpServlet {
 
       PrintWriter writer = response.getWriter();
       
-      navigation( writer, null );
+      navigation( writer, null, null );
 
       writer.println( "<h1>Internal Server Error</h1>" );
       writer.println( "<div>" );
