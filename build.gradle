@@ -16,9 +16,9 @@ apply plugin: 'jetty'
 apply plugin: 'ivy-publish'
 
 group = 'com.infodesire'
-version = '0.0.18'
-httpPort = 8081
-stopPort = 8082
+version = '0.0.19'
+httpPort = 8083
+stopPort = 8084
 stopKey = 10
 
 

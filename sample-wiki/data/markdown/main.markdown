@@ -49,6 +49,7 @@ More oftenly, we will show Code Blocks by indenting it 4+ chars:
 		  time: 0;
 		};
 		a.basic = 'dhf';
+		// a veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryvery long comment
 
 Reading
 -------
