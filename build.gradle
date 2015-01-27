@@ -16,7 +16,7 @@ apply plugin: 'jetty'
 apply plugin: 'ivy-publish'
 
 group = 'com.infodesire'
-version = '0.0.19'
+version = '0.0.20'
 httpPort = 8083
 stopPort = 8084
 stopKey = 10
@@ -125,7 +125,7 @@ jettyRunWar {
 
 // open the browser with the url (TODO: let it wait a second, so we don't new RELOAD page)
 task openUrlInBrowser << {
-   java.awt.Desktop.desktop.browse "http://localhost:8081/wikipower".toURI()
+   java.awt.Desktop.desktop.browse "http://localhost:8083/wikipower".toURI()
 }
 jettyRun.dependsOn openUrlInBrowser
 jettyRunWar.dependsOn openUrlInBrowser
