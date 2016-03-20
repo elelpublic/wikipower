@@ -16,7 +16,7 @@ apply plugin: 'jetty'
 apply plugin: 'ivy-publish'
 
 group = 'com.infodesire'
-version = '0.0.20'
+version = '0.0.21'
 httpPort = 8083
 stopPort = 8084
 stopKey = 10
@@ -149,7 +149,9 @@ dependencies {
     	'org.apache.httpcomponents:httpcore:4.3.2',
     	'org.apache.httpcomponents:httpclient:4.3.5',
     	'log4j:log4j:1.2.17',
-    	'com.google.guava:guava:18.0'
+    	'com.google.guava:guava:18.0',
+      'org.apache.xmlgraphics:fop:2.1'
+      
     	
     )
 

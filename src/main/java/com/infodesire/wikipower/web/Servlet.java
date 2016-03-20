@@ -12,12 +12,17 @@ import com.infodesire.wikipower.storage.Storage;
 import com.infodesire.wikipower.storage.StorageException;
 import com.infodesire.wikipower.storage.StorageLocator;
 import com.infodesire.wikipower.wiki.Page;
+import com.infodesire.wikipower.wiki.PrintRenderer;
 import com.infodesire.wikipower.wiki.RenderConfig;
 import com.infodesire.wikipower.wiki.Renderer;
 import com.infodesire.wikipower.wiki.RouteInfo;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.util.Collection;
@@ -31,7 +36,10 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.transform.TransformerException;
 
+import org.apache.fop.apps.FOPException;
+import org.apache.http.HttpStatus;
 import org.apache.log4j.Logger;
 
 
@@ -39,8 +47,8 @@ public class Servlet extends HttpServlet {
 
 
   private static final long serialVersionUID = -5725536621042065170L;
-
-
+  
+  
   private static Logger logger = Logger.getLogger( Servlet.class );
 
 
@@ -51,13 +59,16 @@ public class Servlet extends HttpServlet {
 
 
   private Renderer renderer;
+  private PrintRenderer printer;
 
 
   private String baseURI;
 
 
   protected void doGet( HttpServletRequest httpRequest,
-    HttpServletResponse response ) throws ServletException, IOException {
+    HttpServletResponse httpResponse ) throws ServletException, IOException {
+
+    ResponseWrapper response = new ResponseWrapper( httpResponse );
 
     try {
 
@@ -65,6 +76,7 @@ public class Servlet extends HttpServlet {
       
       if( httpRequest.getRequestURI().equals( baseURI ) ) {
         response.sendRedirect( baseURI + "/" ); 
+        return;
       }
       
       String uri = request.getRoute().toString();
@@ -106,7 +118,13 @@ public class Servlet extends HttpServlet {
           }
           else {
             Page page = storage.getPage( route );
-            showPage( response, page, route );
+            String print = request.getQueryParam( "print" );
+            if( print != null ) {
+              printPage( response, page, route );
+            }
+            else {
+              showPage( response, page, route );
+            }
           }
         }
         else { // folder
@@ -133,7 +151,7 @@ public class Servlet extends HttpServlet {
   }
 
 
-  private void redirect( HttpServletResponse response, String uri,
+  private void redirect( ResponseWrapper response, String uri,
     String pageName ) throws IOException {
     String redirect = baseURI;
     if( !Strings.isEmpty( baseURI ) ) {
@@ -151,15 +169,15 @@ public class Servlet extends HttpServlet {
     contentTypes.put( "js", "text/javascript" );
   }
   
-  private void doStatic( FilePath route , HttpServletResponse response ) throws IOException {
+  private void doStatic( FilePath route , ResponseWrapper response ) throws IOException {
 
     String extension = Files.getFileExtension( route.getLast() );
     String contentType = contentTypes.get( extension );
     if( contentType != null ) {
-      response.setContentType( contentType );
+      response.getResponse().setContentType( contentType );
     }
     InputStream in = Servlet.class.getResourceAsStream( "/webapp/" + route );
-    ServletOutputStream out = response.getOutputStream();
+    ServletOutputStream out = response.getResponse().getOutputStream();
     Bytes.pipe( in, out );
     in.close();
     out.close();
@@ -167,31 +185,29 @@ public class Servlet extends HttpServlet {
   }
 
 
-  private void showListing( HttpServletResponse response, FilePath route ) throws IOException {
-
-    response.setContentType( "text/html;charset=utf-8" );
-    response.setStatus( HttpServletResponse.SC_OK );
+  private void showListing( ResponseWrapper response, FilePath route ) throws IOException {
 
     PrintWriter writer = response.getWriter();
     
     head( writer );
-    navigation( writer, new FilePath( route, ".index" ), route.getParent() );
+    navigation( writer, new FilePath( route, ".index" ), null, route.getParent() );
     
-    writer.println( "<h1>Listing of " + route + "</h1>" );
+    writer.println( "<h1>Listing of " + ( route.isBase() ? "/" : route ) + "</h1>" );
 
-    writer.println( "<h2>Pages</h2>" );
+    //writer.println( "<h2>Pages</h2>" );
     writer.println( "<div>" );
     for( FilePath subFilePath : new TreeSet<FilePath>( storage.listPages( route ) ) ) {
-      writer.println( "<a href=\"" + baseURI + "/" + subFilePath + "\">" + subFilePath.getLast() + "</a><br>" );
+      link( writer, "file", baseURI + "/" + subFilePath, subFilePath.getLast(), true );
     }
     writer.println( "</div>" );
     
     Collection<FilePath> subFolders = storage.listFolders( route );
     if( !subFolders.isEmpty() ) {
-      writer.println( "<h2>Folders</h2>" );
+      //writer.println( "<h2>Folders</h2>" );
       writer.println( "<div>" );
       for( FilePath subFilePath : subFolders ) {
-        writer.println( "<a href=\"" + baseURI + "/" + subFilePath + "/\">" + subFilePath.getLast() + "/</a><br>" );
+        link( writer, "folder", baseURI + "/" + subFilePath,
+          subFilePath.getLast(), true );
       }
       writer.println( "</div>" );
     }
@@ -202,34 +218,47 @@ public class Servlet extends HttpServlet {
   }
 
 
-  private void navigation( PrintWriter writer, FilePath index, FilePath up )
+  private void link( PrintWriter writer, String icon, String url,
+    String name, boolean linebreak ) {
+
+//    writer.println( "<li class=\"" + icon + "\"><a href=\"" + url + "\">"
+//      + name + "</a></li>" );
+    
+    writer.println( "<a href=\"" + url + "\">" + name + "</a>" );
+    if( linebreak ) {
+      writer.println( "<br>" );
+    }
+    
+  }
+
+
+  private void navigation( PrintWriter writer, FilePath index, FilePath path, FilePath up )
     throws IOException {
 
     writer.println( "<div class=\"wikipower-navigation\"> " );
-    writer.println( "<a href=\"" + baseURI + "\">Home</a> " );
+    link( writer, "home", baseURI, "Home", false );
+    if( path != null ) {
+      writer.println( " &nbsp; " );
+      link( writer, "print", baseURI + "/" + path.toString() + "?print=fo", "Print", false );
+    }
     writer.println( " &nbsp; " );
     if( index != null ) {
-      writer.println( " <a href=\"" + baseURI + "/" + index.toString()
-        + "\">Index</a> " );
+      link( writer, "list", baseURI + "/" + index.toString(), "Index", false );
     }
     if( up != null ) {
       writer.println( " &nbsp; " );
-      writer.println( " <a href=\"" + baseURI + "/" + up.toString()
-        + "\">Up</a> " );
+      link( writer, "arrow up", baseURI + "/" + up.toString(), "Up", false );
     }
     writer.println( "</div>" );
   }
 
 
-  private void debug( PreparedRequest request, HttpServletResponse response ) throws IOException {
-
-    response.setContentType( "text/html;charset=utf-8" );
-    response.setStatus( HttpServletResponse.SC_OK );
+  private void debug( PreparedRequest request, ResponseWrapper response ) throws IOException {
 
     PrintWriter writer = response.getWriter();
     
     head( writer );
-    navigation( writer, null, null );
+    navigation( writer, null, null, null );
     
     writer.println( "<h1>Debug the HTTP request</h1>" );
     writer.println( "<div>" );
@@ -246,11 +275,8 @@ public class Servlet extends HttpServlet {
   }
 
 
-  private void showPage( HttpServletResponse response, Page page, FilePath path  )
+  private void showPage( ResponseWrapper response, Page page, FilePath path  )
     throws IOException, InstantiationException, IllegalAccessException {
-
-    response.setContentType( "text/html;charset=utf-8" );
-    response.setStatus( HttpServletResponse.SC_OK );
 
     PrintWriter writer = response.getWriter();
     head( writer );
@@ -272,7 +298,7 @@ public class Servlet extends HttpServlet {
       }
     }
     
-    navigation( writer, index, up );
+    navigation( writer, index, path, up );
     renderer.render( page, writer );
     foot( writer );
     writer.close();
@@ -280,12 +306,49 @@ public class Servlet extends HttpServlet {
   }
 
 
+  private void printPage( ResponseWrapper response, Page page, FilePath path ) throws IOException, InstantiationException, IllegalAccessException, FOPException, TransformerException, URISyntaxException {
+    
+    File pdfFile = null;
+    FileOutputStream pdfOut = null;
+    
+    try {
+      pdfFile = File.createTempFile( "wikipower-", ".pdf" );
+      pdfOut = new FileOutputStream( pdfFile );
+      printer.render( page, pdfOut );
+    }
+    finally {
+      if( pdfOut != null ) {
+        try {
+          pdfOut.close();
+        }
+        catch( IOException ex ) {}
+      }
+    }
+
+    if( pdfFile != null ) {
+      OutputStream out = response.getOutputStream( HttpStatus.SC_OK,
+        "application/pdf", path.getLast() + ".pdf" );
+      FileInputStream in = new FileInputStream( pdfFile );
+      try {
+        Bytes.pipe( in, out );
+      }
+      finally {
+        try { in.close(); } catch( Exception ex ) {}
+        try { out.close(); } catch( Exception ex ) {}
+      }
+    }
+
+  }
+  
+  
   private void head( PrintWriter writer ) {
     writer.println( "<html><head>" );
     writer.println( "<link rel=\"icon\" type=\"image/ico\" href=\"" + baseURI
       + "/static/images/favicon.ico\"/>" );
     writer.println( "<link rel=\"stylesheet\" type=\"text/css\" href=\""
       + baseURI + "/static/css/wikipower.css\"></link>" );
+//    writer.println( "<link rel=\"stylesheet\" type=\"text/css\" href=\""
+//      + baseURI + "/static/css/icons.css\"></link>" );
     writer.println( "</head><body><div class=\"wikipower-content\">" );
   }
 
@@ -295,15 +358,12 @@ public class Servlet extends HttpServlet {
   }
   
   
-  private void notFoundPage( HttpServletResponse response, FilePath route )
+  private void notFoundPage( ResponseWrapper response, FilePath route )
     throws IOException {
 
-    response.setContentType( "text/html;charset=utf-8" );
-    response.setStatus( HttpServletResponse.SC_NOT_FOUND );
-
-    PrintWriter writer = response.getWriter();
+    PrintWriter writer = response.getWriter( HttpServletResponse.SC_NOT_FOUND );
     
-    navigation( writer, null, null );
+    navigation( writer, null, null, null );
     
     writer.println( "<h1>No such page</h1>" );
     writer.println( "<div>" );
@@ -343,16 +403,14 @@ public class Servlet extends HttpServlet {
 
 
   private void errorPage( Exception ex, HttpServletRequest request,
-    HttpServletResponse response ) {
+    ResponseWrapper response ) {
 
     try {
 
-      response.setContentType( "text/html;charset=utf-8" );
-      response.setStatus( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
-
-      PrintWriter writer = response.getWriter();
+      PrintWriter writer = response
+        .getWriter( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
       
-      navigation( writer, null, null );
+      navigation( writer, null, null, null );
 
       writer.println( "<h1>Internal Server Error</h1>" );
       writer.println( "<div>" );
@@ -400,6 +458,54 @@ public class Servlet extends HttpServlet {
     if( storage == null ) {
       throw new ServletException(
         "No wikiDataURL configuration found" );
+    }
+    
+    printer = new PrintRenderer( renderConfig );
+    
+  }
+  
+  
+  class ResponseWrapper {
+
+    private HttpServletResponse response;
+    private PrintWriter writer;
+    private OutputStream outputStream;
+
+    public ResponseWrapper( HttpServletResponse response ) {
+      this.response = response;
+    }
+
+    public HttpServletResponse getResponse() {
+      return response;
+    }
+
+    public void sendRedirect( String url ) throws IOException {
+      response.sendRedirect( url );
+    }
+
+    public PrintWriter getWriter() throws IOException {
+      return getWriter( HttpServletResponse.SC_OK );
+    }
+
+    public PrintWriter getWriter( int httpStatusCode ) throws IOException {
+      if( writer == null ) {
+        response.setContentType( "text/html;charset=utf-8" );
+        response.setStatus( httpStatusCode );
+        writer = response.getWriter();
+      }
+      return writer;
+    }
+    
+
+    public OutputStream getOutputStream( int httpStatusCode, String contentType, String fileName ) throws IOException {
+      if( outputStream == null ) {
+        response.setContentType( contentType );
+        response.setStatus( httpStatusCode );
+        response.setHeader( "Content-Disposition", "inline; filename=\""
+          + fileName + "\"" );
+        outputStream = response.getOutputStream();
+      }
+      return outputStream;
     }
     
   }
